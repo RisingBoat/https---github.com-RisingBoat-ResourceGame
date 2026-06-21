@@ -1,0 +1,2593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>⚔ ASHVEIL</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg0:#0e0d0b;--bg1:#141210;--bg2:#1c1914;--bg3:#242018;--bg4:#2e291f;--bg5:#3a3327;
+--amber:#c8800a;--amber2:#e8960f;--amber3:#f5b020;--amber4:#fac75a;
+--teal:#1d9e75;--teal2:#2dbf8f;--teal3:#5ddba8;
+--red:#9b2020;--red2:#c03030;--green:#1e7a3a;--green2:#27ae60;
+--text1:#e8d9b8;--text2:#a89878;--text3:#6b5e48;--text4:#3e3628;
+--border:#332d22;--border2:#4a4238;--border3:#5a5248;
+}
+html,body{background:var(--bg0);color:var(--text1);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+#topbar{background:var(--bg1);border-bottom:1px solid var(--border);padding:0 14px;display:flex;align-items:center;gap:14px;height:46px;flex-shrink:0}
+#logo{color:var(--amber3);font-weight:800;font-size:16px;letter-spacing:2px;margin-right:6px}
+.pool{display:flex;align-items:center;gap:7px;font-size:11px}
+.pool-inner{display:flex;flex-direction:column;gap:2px}
+.pool-bar{width:130px;height:13px;background:var(--bg4);border-radius:3px;overflow:hidden;border:1px solid var(--border2)}
+.pool-fill{height:100%;transition:width 0.3s}
+.pool-fill.hp{background:#7a1818}
+.pool-fill.sp{background:#196430}
+.pool-fill.mp{background:#182a6a}
+.pool-nums{font-size:10px;color:var(--text2);display:flex;justify-content:space-between;gap:8px}
+.pool-rate{font-size:10px;font-weight:600}
+.pool-rate.pos{color:var(--teal3)}.pool-rate.neg{color:#e07070}.pool-rate.neutral{color:var(--text3)}
+.pool-icon{font-size:16px;width:20px;text-align:center}
+#gold-display{margin-left:auto;color:var(--amber4);font-weight:700;font-size:15px}
+#maintabs{background:var(--bg1);border-bottom:1px solid var(--border);display:flex;flex-shrink:0;overflow-x:auto}
+.mtab{padding:9px 16px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;font-size:11px;font-weight:600;letter-spacing:0.3px;white-space:nowrap;transition:color 0.15s;user-select:none}
+.mtab:hover{color:var(--text1)}.mtab.active{color:var(--amber3);border-bottom-color:var(--amber3)}
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.panel{display:none;width:100%;overflow:hidden;flex-direction:row}
+.panel.active{display:flex}
+.sidebar{width:260px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--bg1)}
+.mainarea{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:10px}
+.card-title{color:var(--amber3);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.skill-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.stab{padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:11px;transition:all 0.12s;white-space:nowrap;user-select:none}
+.stab:hover,.stab.active{background:var(--bg5);color:var(--amber3);border-color:var(--amber)}
+.xprow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.xpbar{flex:1;height:7px;background:var(--bg0);border-radius:4px;overflow:hidden}
+.xpfill{height:100%;background:var(--amber2);border-radius:4px;transition:width 0.3s}
+.xplabel{font-size:10px;color:var(--text2);min-width:70px;text-align:right}
+.srow{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid var(--bg3)}
+.srow:last-child{border:none}
+.sk{color:var(--text2)}.sv{font-weight:600;color:var(--text1)}
+.sv.good{color:var(--teal3)}.sv.warn{color:var(--amber3)}.sv.bad{color:#e07070}
+.badge{display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:0.3px}
+.badge.lv{background:var(--bg4);color:var(--text2);border:1px solid var(--border2)}
+.badge.corrupt{background:#4a1010;color:#e07070}
+.badge.vigilant{background:#0e2040;color:#70a0e0}
+.badge.police{background:#0e2a1a;color:var(--teal3)}
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ac{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 10px;transition:border-color 0.15s}
+.ac:hover{border-color:var(--border3)}.ac.running{border-color:var(--amber2);background:var(--bg4)}.ac.locked{opacity:0.45}
+.ac-head{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
+.ac-icon{width:34px;height:34px;border-radius:4px;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.ac-meta{flex:1;min-width:0}
+.ac-name{font-size:12px;font-weight:700;color:var(--text1);margin-bottom:1px}
+.ac-name.locked-name{color:var(--text3)}
+.ac-stats{font-size:10px;color:var(--text2);line-height:1.5}
+.ac-xp{font-size:10px;color:var(--teal3);margin-top:1px}
+.prog-bar{height:3px;background:var(--bg1);border-radius:2px;margin:5px 0;overflow:hidden}
+.prog-fill{height:100%;background:var(--amber2);border-radius:2px;transition:width 0.05s linear}
+.ac-btns{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.btn{padding:3px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text1);cursor:pointer;font-size:11px;font-weight:600;transition:all 0.12s;white-space:nowrap;user-select:none}
+.btn:hover{background:var(--bg5);border-color:var(--border3)}
+.btn.primary{background:var(--amber2);color:#100800;border-color:var(--amber2)}
+.btn.primary:hover{background:var(--amber3)}
+.btn.stop{background:var(--bg4);border-color:var(--amber2);color:var(--amber3)}
+.btn.danger{border-color:#7a1818;color:#e07070}
+.btn.danger:hover{background:#7a1818;color:var(--text1)}
+.btn.teal{background:var(--teal);border-color:var(--teal2);color:#fff}
+.btn.teal:hover{background:var(--teal2)}
+.btn.sm{padding:2px 7px;font-size:10px}
+.inp{background:var(--bg1);border:1px solid var(--border2);border-radius:4px;padding:4px 8px;color:var(--text1);font-size:12px;width:100%}
+.inp:focus{outline:none;border-color:var(--amber2)}
+select.inp option{background:var(--bg2)}
+.sec-lbl{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px;font-weight:600}
+.mkt-hdr,.mkt-row{display:grid;grid-template-columns:1fr 55px 70px 95px;gap:6px;align-items:center;padding:4px 6px;font-size:11px}
+.mkt-hdr{font-size:10px;color:var(--text3);letter-spacing:0.5px;border-bottom:1px solid var(--border)}
+.mkt-row{border-radius:3px}.mkt-row:hover{background:var(--bg3)}
+.price-up{color:var(--teal3)}.price-dn{color:#e07070}
+.plot-card{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:6px}
+.building-row{background:var(--bg4);border:1px solid var(--border);border-radius:4px;padding:7px 9px;margin-top:5px}
+.zone-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.ztab{padding:5px 12px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:11px;font-weight:600;transition:all 0.12s;user-select:none}
+.ztab.active,.ztab:hover{background:var(--bg5);color:var(--amber3);border-color:var(--amber)}
+.thief-section{font-size:10px;color:var(--text3);letter-spacing:1px;font-weight:700;text-transform:uppercase;margin:8px 0 4px}
+.heist-ac{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 11px;display:grid;grid-template-columns:36px 1fr auto;gap:8px;align-items:center;margin-bottom:5px;transition:border-color 0.15s}
+.heist-ac.running{border-color:var(--amber2);background:var(--bg4)}
+.combat-arena{background:var(--bg3);border:1px solid var(--border);border-radius:8px;min-height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:8px}
+.combatant{display:flex;flex-direction:column;align-items:center;gap:5px;padding:15px;min-width:130px}
+.c-sprite{font-size:44px;line-height:1}
+.c-name{font-size:11px;font-weight:700;letter-spacing:0.5px}
+.c-hp-bar{width:110px;height:9px;background:var(--bg1);border-radius:4px;overflow:hidden}
+.c-hp-fill{height:100%;background:var(--red2);border-radius:4px;transition:width 0.3s}
+.c-hp-fill.player{background:#7a1818}
+.vs-text{font-size:24px;font-weight:900;color:var(--text3);padding:0 20px}
+.combat-log{background:var(--bg4);border-radius:4px;padding:8px;font-size:11px;color:var(--text2);max-height:90px;overflow-y:auto;margin-bottom:8px}
+.combat-log .hit{color:var(--amber3)}.combat-log .miss{color:var(--text3)}.combat-log .crit{color:#ff6b6b;font-weight:700}.combat-log .heal{color:var(--teal3)}
+.stone-card{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:flex-start;gap:10px}
+.stone-card.attuned{border-color:var(--amber2);background:var(--bg4)}
+.stone-icon{font-size:26px;width:36px;text-align:center;flex-shrink:0}
+.stone-name{font-size:13px;font-weight:700;color:var(--text1);margin-bottom:2px}
+.stone-desc{font-size:10px;color:var(--text2);margin-bottom:5px}
+.stone-boon{font-size:11px;color:var(--teal3)}
+.res-card{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:10px;margin-bottom:6px}
+.res-title{font-size:12px;font-weight:700;color:var(--text1);margin-bottom:2px}
+.res-desc{font-size:10px;color:var(--text2);margin-bottom:6px}
+.pol-row{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:7px 9px;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.craft-amt{display:flex;gap:5px;align-items:center;margin-bottom:8px}
+.craft-amt button{padding:3px 12px;border-radius:3px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:11px;font-weight:600;user-select:none}
+.craft-amt button.active{background:var(--amber2);color:#100800;border-color:var(--amber2)}
+.victory-text{font-size:26px;font-weight:900;color:var(--amber3);letter-spacing:3px;text-align:center}
+.combat-area-mid{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+#notif{position:fixed;bottom:14px;right:14px;background:var(--bg2);border:1px solid var(--amber2);border-radius:6px;padding:8px 16px;color:var(--amber3);font-size:11px;z-index:9999;transition:opacity 0.4s;pointer-events:none;max-width:260px}
+
+/* gradient progress bars */
+.prog-fill{background:linear-gradient(90deg,#7a3d00 0%,var(--amber2) 70%,var(--amber4) 100%) !important;transition:width 0.12s linear !important}
+.xpfill{background:linear-gradient(90deg,#5a2e00 0%,var(--amber2) 70%,var(--amber3) 100%) !important;transition:width 0.2s ease !important}
+/* level-up overlay */
+#lvlup-ov{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:10000;display:none;align-items:center;justify-content:center;cursor:pointer}
+#lvlup-ov.show{display:flex}
+#lvlup-box{background:var(--bg2);border:1px solid var(--amber2);border-radius:12px;padding:36px 44px;text-align:center;max-width:320px;pointer-events:none;animation:lvin .22s ease}
+@keyframes lvin{from{transform:scale(.82);opacity:0}to{transform:scale(1);opacity:1}}
+/* active task banner */
+#act-banner{background:var(--bg2);border-bottom:1px solid var(--border2);flex-shrink:0;max-height:0;overflow:hidden;transition:max-height .3s ease;width:100%}
+#act-banner.open{max-height:160px}
+.banner-bar-wrap{height:10px;background:var(--bg0);border-radius:5px;overflow:hidden;margin:5px 0}
+.banner-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,#7a3d00 0%,var(--amber2) 65%,var(--amber4) 100%);border-radius:5px;transition:width .1s linear}
+.feed-line{font-size:10px;display:flex;gap:8px;flex-wrap:wrap;padding:1px 0}
+.fc-pos{color:var(--teal3)}.fc-neg{color:#e07070}.fc-xp{color:var(--amber3)}.fc-dim{color:var(--text3)}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <span id="logo">⚔ ASHVEIL</span>
+  <div class="pool">
+    <span class="pool-icon">❤</span>
+    <div class="pool-inner">
+      <div class="pool-bar"><div class="pool-fill hp" id="hp-fill" style="width:100%"></div></div>
+      <div class="pool-nums"><span id="hp-val">100/100</span><span class="pool-rate pos" id="hp-rate">+11.2/s</span></div>
+    </div>
+  </div>
+  <div class="pool">
+    <span class="pool-icon">⚡</span>
+    <div class="pool-inner">
+      <div class="pool-bar"><div class="pool-fill sp" id="sp-fill" style="width:100%"></div></div>
+      <div class="pool-nums"><span id="sp-val">100/100</span><span class="pool-rate neutral" id="sp-rate">—</span></div>
+    </div>
+  </div>
+  <div class="pool">
+    <span class="pool-icon">✦</span>
+    <div class="pool-inner">
+      <div class="pool-bar"><div class="pool-fill mp" id="mp-fill" style="width:100%"></div></div>
+      <div class="pool-nums"><span id="mp-val">50/50</span><span class="pool-rate neutral" id="mp-rate">Full</span></div>
+    </div>
+  </div>
+  <span id="gold-display">🪙 <span id="gval">500</span></span>
+</div>
+
+<div id="maintabs">
+  <div class="mtab" data-tab="profile">👤 Profile</div>
+  <div class="mtab active" data-tab="skilling">⛏ Skilling</div>
+  <div class="mtab" data-tab="crafting">🔨 Crafting</div>
+  <div class="mtab" data-tab="market">📊 Market</div>
+  <div class="mtab" data-tab="thieving">🗡 Thieving</div>
+  <div class="mtab" data-tab="research">🔬 Research</div>
+  <div class="mtab" data-tab="combat">⚔ Combat</div>
+</div>
+
+<div id="content">
+
+<!-- SKILLING -->
+<!-- active task banner -->
+<div id="act-banner">
+  <div style="padding:8px 14px 6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text1)">
+        <span id="bn-icon">⛏</span><span id="bn-name">—</span>
+        <span id="bn-state" style="font-size:10px;font-weight:600;color:var(--amber3)">● idle</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="bn-drain" style="font-size:11px;font-weight:600;color:var(--teal3)"></span>
+        <button class="btn sm stop" onclick="bannerStop()">Stop</button>
+      </div>
+    </div>
+    <div class="banner-bar-wrap"><div class="banner-bar-fill" id="bn-prog"></div></div>
+    <div id="bn-feed" style="max-height:52px;overflow:hidden;display:flex;flex-direction:column-reverse"></div>
+  </div>
+</div>
+
+<!-- level-up overlay -->
+<div id="lvlup-ov" onclick="lvlClose()">
+  <div id="lvlup-box">
+    <div id="lu-icon" style="font-size:50px;margin-bottom:6px">⚒</div>
+    <div id="lu-skill" style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--amber3);margin-bottom:4px">Smithing</div>
+    <div id="lu-title" style="font-size:22px;font-weight:800;color:var(--text1);font-variant:small-caps;margin-bottom:5px">Smithing Level 42!</div>
+    <div id="lu-sub" style="font-size:12px;color:var(--text2);margin-bottom:18px">Your Smithing mastery deepens.</div>
+    <button onclick="event.stopPropagation();lvlClose()" style="width:100%;padding:10px;background:linear-gradient(90deg,var(--amber),var(--amber3));border:none;border-radius:6px;font-size:14px;font-weight:700;color:#100800;cursor:pointer">Onward</button>
+  </div>
+</div>
+
+<!-- STANDING STONES OVERLAY -->
+<div id="stones-ov" style="position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:9999;display:none;align-items:center;justify-content:center;cursor:pointer;padding:30px" onclick="closeStones()">
+  <div style="background:var(--bg2);border:1px solid var(--amber2);border-radius:12px;padding:18px 20px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto;cursor:default" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <div style="font-size:15px;font-weight:800;color:var(--amber3);letter-spacing:1px">⭐ STANDING STONES</div>
+      <button class="btn sm" onclick="closeStones()">✕ Close</button>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Attune to one stone for an always-on boon that grows as you raise Stargazing.</div>
+    <div style="display:flex;gap:14px;font-size:11px;margin-bottom:10px">
+      <span>Stargazing Lv <b id="stone-sg-lv">1</b></span>
+      <span>Attuned: <b class="sv warn" id="stone-attuned">None</b></span>
+      <span>Boon: <b class="sv good" id="stone-boon-val">—</b></span>
+    </div>
+    <div id="stones-list"></div>
+  </div>
+</div>
+
+
+<div id="panels-wrap" style="flex:1;overflow:hidden;display:flex;min-height:0">
+<div class="panel" id="tab-profile">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Character</div>
+      <div class="srow"><span class="sk">Gold</span><span class="sv warn" id="prof-gold">—</span></div>
+      <div class="srow"><span class="sk">Sales Today</span><span class="sv" id="prof-sales">—</span></div>
+      <div class="srow"><span class="sk">Capacity</span><span class="sv" id="prof-cap">—</span></div>
+      <div class="srow"><span class="sk">Role</span><span class="sv" id="prof-role">Citizen</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Pools</div>
+      <div class="srow"><span class="sk">❤ Health</span><span class="sv" id="prof-hp">—</span></div>
+      <div class="srow"><span class="sk">⚡ Stamina</span><span class="sv" id="prof-sp">—</span></div>
+      <div class="srow"><span class="sk">✦ Mana</span><span class="sv" id="prof-mp">—</span></div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="card">
+      <div class="card-title">🏛 Government</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;margin-bottom:8px">
+        <div class="srow"><span class="sk">Treasury</span><span class="sv warn" id="gov-treasury">0g</span></div>
+        <div class="srow"><span class="sk">Tax Rate</span><span class="sv" id="gov-rate">5%</span></div>
+        <div class="srow"><span class="sk">Your Tax Today</span><span class="sv" id="gov-mytax">0g</span></div>
+        <div class="srow"><span class="sk">NPC Tax Today</span><span class="sv" id="gov-npctax">0g</span></div>
+      </div>
+      <div style="font-size:10px;color:var(--text3);line-height:1.6">The government collects <b id="gov-rate2">5%</b> of all gold earned in the economy — by you, by NPC traders, and from population consumption — into the public treasury. Police funding is drawn from it.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Stats <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0">— sum of all skill levels training each stat. Higher stats = faster actions.</span></div>
+      <div id="prof-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">All Skills</div>
+      <div id="prof-skills" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel active" id="tab-skilling">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Skill</div>
+      <div id="sk-tabs" class="skill-tabs"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span id="sk-name">Woodcutting</span><span class="badge lv" id="sk-lv">Lv 1</span></div>
+      <div class="xprow"><div class="xpbar"><div class="xpfill" id="sk-xpbar" style="width:0%"></div></div><span class="xplabel" id="sk-xplbl">0/50</span></div>
+      <div class="srow"><span class="sk">Stat</span><span class="sv warn" id="sk-stat">Strength</span></div>
+      <div class="srow"><span class="sk">Tool</span><span class="sv" id="sk-tool">Basic Axe (Lv 0)</span></div>
+      <div class="srow"><span class="sk">Speed Mult</span><span class="sv good" id="sk-speed">1.00×</span></div>
+      <div class="srow"><span class="sk">Group Mastery</span><span class="sv good" id="sk-gmastery">+0%</span></div>
+      <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap"><button class="btn sm primary" onclick="upgradeSkillTool()">⬆ Upgrade Tool</button><button class="btn sm" id="sk-stones-btn" style="display:none" onclick="openStones()">⭐ Standing Stones</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Tasks</div>
+      <div id="active-list" style="font-size:11px;color:var(--text3)">None running.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Speed Formula</div>
+      <div style="font-size:10px;color:var(--text2);line-height:1.8">
+        Base time ÷ (<br>
+        &nbsp;Stat bonus<br>
+        &nbsp;× Item mastery<br>
+        &nbsp;× Group mastery<br>
+        &nbsp;× Tool tier<br>
+        &nbsp;× Research bonus<br>
+        &nbsp;× Standing Stone<br>
+        &nbsp;× Action bonus<br>)
+      </div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="card" style="padding:8px 10px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:3px" id="sk-header-desc">Trains: <span style="color:var(--amber3)">Woodcutting XP</span> · <span style="color:var(--teal3)">Strength</span></div>
+      <div class="xprow" style="margin-bottom:0"><div class="xpbar" style="height:5px"><div class="xpfill" id="sk-prog-bar2" style="width:0%"></div></div><span class="xplabel" id="sk-xplbl2">Lv 15 → 16</span></div>
+    </div>
+    <div class="action-grid" id="action-grid"></div>
+  </div>
+</div>
+
+<!-- CRAFTING -->
+<div class="panel" id="tab-crafting">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Craft Skill</div>
+      <div id="craft-tabs" class="skill-tabs"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Craft Amount</div>
+      <div class="craft-amt" id="craft-amt-btns">
+        <button onclick="setCraftAmt(1,this)">1</button>
+        <button onclick="setCraftAmt(10,this)">10</button>
+        <button class="active" onclick="setCraftAmt(0,this)">Max</button>
+      </div>
+      <div class="srow"><span class="sk">Skill</span><span class="sv" id="craft-skill-lbl">Cooking</span></div>
+      <div class="srow"><span class="sk">Level</span><span class="sv" id="craft-lv-lbl">Lv 1</span></div>
+      <div class="xprow" style="margin-top:6px"><div class="xpbar"><div class="xpfill" id="craft-xpbar" style="width:0%"></div></div><span class="xplabel" id="craft-xplbl">0/50</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Crafts</div>
+      <div id="craft-active" style="font-size:11px;color:var(--text3)">None.</div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="action-grid" id="craft-grid"></div>
+  </div>
+</div>
+
+<!-- MARKET -->
+<div class="panel" id="tab-market">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Market Status</div>
+      <div class="srow"><span class="sk">Thief Penalty</span><span class="sv bad" id="mkt-thief-pen">−0%</span></div>
+      <div class="srow"><span class="sk">Sales Today</span><span class="sv" id="mkt-sales">0g</span></div>
+      <div class="srow"><span class="sk">🔥 Heat Stored</span><span class="sv warn" id="mkt-heat">0</span></div>
+      <div class="srow"><span class="sk">👥 Population</span><span class="sv" id="mkt-pop">0</span></div>
+      <div class="srow"><span class="sk">Next Consume</span><span class="sv" id="mkt-consume-t">—</span></div>
+      <div style="margin-top:8px"><button class="btn primary" style="width:100%;margin-bottom:4px" onclick="sellAll()">💰 Sell All</button></div>
+      <div style="margin-top:4px"><button class="btn" style="width:100%" onclick="buyHeatManual()">🔥 Buy 100 Heat</button></div>
+      <div style="margin-top:8px;font-size:10px;color:var(--text3);line-height:1.6">Selling lowers prices. Buying & population demand raise them. Heat fuels crafting.</div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="card" style="padding:6px 8px">
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="ztab active" id="msub-prices" onclick="setMktSub('prices')">📊 Prices</button>
+        <button class="ztab" id="msub-inventory" onclick="setMktSub('inventory')">🎒 Inventory</button>
+        <button class="ztab" id="msub-land" onclick="setMktSub('land')">🌍 Land</button>
+        <button class="ztab" id="msub-heat" onclick="setMktSub('heat')">🔥 Heat</button>
+        <button class="ztab" id="msub-economy" onclick="setMktSub('economy')">👥 Economy</button>
+        <button class="ztab" id="msub-consumption" onclick="setMktSub('consumption')">🛒 Consumption</button>
+        <button class="ztab" id="msub-profits" onclick="setMktSub('profits')">📈 Profits</button>
+      </div>
+    </div>
+    <div class="card" id="msub-content"></div>
+  </div>
+</div>
+
+<!-- THIEVING -->
+<div class="panel" id="tab-thieving">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Thieving <span class="badge lv" id="thv-lv-badge">Lv 1</span></div>
+      <div class="xprow"><div class="xpbar"><div class="xpfill" id="thv-xpbar" style="width:0%"></div></div><span class="xplabel" id="thv-xplbl">0/50</span></div>
+      <div class="srow"><span class="sk">Active Thieves</span><span class="sv bad" id="thv-count">3</span></div>
+      <div class="srow"><span class="sk">Market Penalty</span><span class="sv bad" id="thv-mpen">−9%</span></div>
+      <div class="srow"><span class="sk">Your Bonus</span><span class="sv good" id="thv-mybonus">+0%</span></div>
+      <div class="srow"><span class="sk">Catch Chance</span><span class="sv bad" id="thv-catch">0%</span></div>
+      <div style="margin-top:8px">
+        <div id="thv-my-status" style="font-size:11px;color:var(--text2);margin-bottom:6px">Not in the guild.</div>
+        <button class="btn primary" id="thv-join" onclick="joinThieves()" style="width:100%;margin-bottom:4px">Join Thieves Guild</button>
+        <button class="btn danger" id="thv-leave" style="display:none;width:100%" onclick="leaveThieves()">Leave Guild</button>
+      </div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="card" style="padding:6px 8px;margin-bottom:8px">
+      <div style="display:flex;gap:5px">
+        <button class="ztab active" id="tsub-thieving" onclick="setThvSub('thieving')">🗡 Thieving</button>
+        <button class="ztab" id="tsub-police" onclick="setThvSub('police')">🛡 Police</button>
+      </div>
+    </div>
+    <div id="thv-sub-thieving">
+      <div style="margin-bottom:8px;font-size:11px;color:var(--text2)">Work the marks and heists – get caught and lie low, then carry on. Travel to find new scores.</div>
+      <div class="zone-tabs" id="zone-tabs"></div>
+      <div id="thv-actions"></div>
+    </div>
+    <div id="thv-sub-police" style="display:none">
+      <div class="card" style="margin-bottom:8px">
+        <div class="card-title">Police Force</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;font-size:11px">
+          <div class="srow"><span class="sk">Total</span><span class="sv" id="pol-total">2</span></div>
+          <div class="srow"><span class="sk">Honest</span><span class="sv good" id="pol-honest">1</span></div>
+          <div class="srow"><span class="sk">Corrupt</span><span class="sv bad" id="pol-corrupt">1</span></div>
+          <div class="srow"><span class="sk">Vigilants</span><span class="sv" id="pol-vigil">0</span></div>
+          <div class="srow"><span class="sk">Funding</span><span class="sv" id="pol-fund-lbl">None</span></div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn sm" onclick="fundPolice()">💰 Fund Police (100g/day)</button>
+          <span id="pol-my-status" style="font-size:11px;color:var(--text2);align-self:center">Not on force.</span>
+        </div>
+        <div id="pol-join-btns" style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn sm" onclick="joinPolice('police')">🛡 Join as Officer</button>
+          <button class="btn sm" onclick="joinPolice('corrupt')">🦹 Join as Corrupt</button>
+          <button class="btn sm" onclick="joinPolice('vigilant')">⚖ Join as Vigilant</button>
+        </div>
+        <div style="font-size:10px;color:var(--text3);line-height:1.6;margin-top:6px">Corrupt officers earn thief bonuses but don't reduce crime. Vigilants expose corrupt officers. Catch rate = police/(police+thieves).</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Officers on Duty</div>
+        <div id="pol-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESEARCH -->
+<div class="panel" id="tab-research">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Active Research</div>
+      <div class="srow"><span class="sk">Task</span><span class="sv" id="res-active">None</span></div>
+      <div class="srow"><span class="sk">Progress</span><span class="sv" id="res-prog-lbl">—</span></div>
+      <div class="srow"><span class="sk">Fail / lot</span><span class="sv bad" id="res-fail">—</span></div>
+      <div class="xprow" style="margin-top:8px"><div class="xpbar" style="height:7px"><div class="xpfill" id="res-prog-bar" style="width:0%;background:var(--teal2)"></div></div></div>
+      <button class="btn sm danger" id="res-cancel" style="display:none;margin-top:6px;width:100%" onclick="cancelResearch()">Cancel</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Mastery</div>
+      <div class="srow"><span class="sk">Your highest level</span><span class="sv good" id="res-myhigh">0</span></div>
+      <div class="srow"><span class="sk">Global highest level</span><span class="sv warn" id="res-globalhigh">0</span></div>
+      <div class="srow"><span class="sk">Highest bauble</span><span class="sv" id="res-baublehigh">0★</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Studied Baubles <span style="text-transform:none;letter-spacing:0;color:var(--text3)">— your gold share</span></div>
+      <div id="res-my-baubles" style="font-size:11px;color:var(--text3)">None — Study a bauble to earn a share of all research gold.</div>
+    </div>
+  </div>
+  <div class="mainarea"><div id="res-list"></div></div>
+</div>
+
+<!-- COMBAT -->
+<div class="panel" id="tab-combat">
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Combat Stats</div>
+      <div class="srow"><span class="sk">Attack</span><span class="sv" id="cbt-atk">24</span></div>
+      <div class="srow"><span class="sk">Defence</span><span class="sv" id="cbt-def">18</span></div>
+      <div class="srow"><span class="sk">Crit Chance</span><span class="sv good">8%</span></div>
+      <div class="srow"><span class="sk">Auto-fight</span><span class="sv" id="cbt-auto-lbl">Off</span></div>
+      <div style="margin-top:8px"><button class="btn" id="cbt-auto-btn" style="width:100%;margin-bottom:4px" onclick="toggleAuto()">⚡ Toggle Auto</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Zone</div>
+      <div id="cbt-zones"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Area Drops</div>
+      <div id="cbt-drops" style="font-size:11px;color:var(--text2)">Fight to see drops.</div>
+    </div>
+  </div>
+  <div class="mainarea">
+    <div class="combat-arena" id="combat-arena">
+      <div class="combatant">
+        <div class="c-sprite">🧙</div>
+        <div class="c-name">RISINGASHES</div>
+        <div class="c-hp-bar"><div class="c-hp-fill player" id="p-hp" style="width:52%"></div></div>
+        <div style="font-size:10px;color:var(--text2)" id="p-hp-num">663/1270</div>
+      </div>
+      <div class="vs-text">VS</div>
+      <div class="combatant">
+        <div class="c-sprite" id="e-sprite">💀</div>
+        <div class="c-name" id="e-name">RISEN SKELETON</div>
+        <div class="c-hp-bar"><div class="c-hp-fill" id="e-hp" style="width:41%"></div></div>
+        <div style="font-size:10px;color:var(--text2)" id="e-hp-num">83/200</div>
+      </div>
+      <div class="combat-area-mid" id="combat-flash" style="opacity:0;transition:opacity 0.5s"></div>
+    </div>
+    <div class="combat-log" id="cbt-log"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn primary" id="cbt-fight-btn" onclick="startFight()">⚔ Fight</button>
+      <button class="btn stop" id="cbt-flee-btn" onclick="fleeFight()" style="display:none">🏃 Flee</button>
+      <span style="font-size:11px;color:var(--text2)" id="cbt-status">Pick a zone and fight an enemy.</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+<div id="notif" style="opacity:0"></div>
+
+<script>
+// ═══════════════ STATE ═══════════════
+const G={
+  gold:500,salesDay:0,holdCap:200,
+  hp:100,hpMax:100,hpRegen:1.0,
+  sp:100,spMax:100,spRegen:1.5,
+  mp:50,mpMax:50,mpRegen:0.5,
+  craftAmt:0,
+  capLv:0,
+  myThief:false,myPolice:null,
+  policeFunded:false,
+  attunedStone:null,
+  resActive:null,resProg:0,
+  cbtAuto:false,cbtFighting:false,
+  profSort:'xph'
+};
+
+// ═══════════════ SKILLS ═══════════════
+const SKILLS=[
+  {id:'woodcutting',name:'Woodcutting',icon:'🪵',stat:'Strength',statBonus:0.05,lv:1,xp:0,toolName:'Basic Axe',toolLv:0,mastery:{},groupMastery:0},
+  {id:'mining',name:'Mining',icon:'⛏',stat:'Strength',statBonus:0.05,lv:1,xp:0,toolName:'Basic Pick',toolLv:0,mastery:{},groupMastery:0},
+  {id:'fishing',name:'Fishing',icon:'🎣',stat:'Agility',statBonus:0.03,lv:1,xp:0,toolName:'Basic Rod',toolLv:0,mastery:{},groupMastery:0},
+  {id:'foraging',name:'Foraging',icon:'🌿',stat:'Perception',statBonus:0.04,lv:1,xp:0,toolName:'None',toolLv:0,mastery:{},groupMastery:0},
+  {id:'hunting',name:'Hunting',icon:'🏹',stat:'Agility',statBonus:0.04,lv:1,xp:0,toolName:'Basic Bow',toolLv:0,mastery:{},groupMastery:0},
+  {id:'stargazing',name:'Stargazing',icon:'⭐',stat:'Intelligence',statBonus:0.06,lv:1,xp:0,toolName:'Basic Scope',toolLv:0,mastery:{},groupMastery:0},
+  {id:'farming',name:'Farming',icon:'🌾',stat:'Endurance',statBonus:0.03,lv:1,xp:0,toolName:'Hoe',toolLv:0,mastery:{},groupMastery:0},
+  {id:'thieving',name:'Thieving',icon:'🗡',stat:'Agility',statBonus:0.05,lv:1,xp:0,toolName:'None',toolLv:0,mastery:{},groupMastery:0}
+];
+const CRAFT_SKILLS=[
+  {id:'cooking',name:'Cooking',icon:'🍳',stat:'Intellect',statBonus:0.03,lv:1,xp:0,toolName:'Pot',toolLv:0,mastery:{},groupMastery:0},
+  {id:'smithing',name:'Smithing',icon:'⚒',stat:'Strength',statBonus:0.05,lv:1,xp:0,toolName:'Anvil',toolLv:0,mastery:{},groupMastery:0},
+  {id:'fletching',name:'Fletching',icon:'🏹',stat:'Dexterity',statBonus:0.04,lv:1,xp:0,toolName:'Knife',toolLv:0,mastery:{},groupMastery:0},
+  {id:'alchemy',name:'Alchemy',icon:'⚗',stat:'Intelligence',statBonus:0.06,lv:1,xp:0,toolName:'Cauldron',toolLv:0,mastery:{},groupMastery:0},
+  {id:'leatherwork',name:'Leatherworking',icon:'🧶',stat:'Dexterity',statBonus:0.04,lv:1,xp:0,toolName:'Needle',toolLv:0,mastery:{},groupMastery:0},
+  {id:'tailoring',name:'Tailoring',icon:'🪡',stat:'Dexterity',statBonus:0.03,lv:1,xp:0,toolName:'Loom',toolLv:0,mastery:{},groupMastery:0},
+  {id:'jewelcrafting',name:'Jewelcrafting',icon:'💎',stat:'Dexterity',statBonus:0.05,lv:1,xp:0,toolName:'Grinder',toolLv:0,mastery:{},groupMastery:0},
+  {id:'enchanting',name:'Enchanting',icon:'✨',stat:'Intelligence',statBonus:0.07,lv:1,xp:0,toolName:'Runestone',toolLv:0,mastery:{},groupMastery:0},
+  {id:'plankmaking',name:'Plank-making',icon:'🪚',stat:'Strength',statBonus:0.04,lv:1,xp:0,toolName:'Saw',toolLv:0,mastery:{},groupMastery:0}
+];
+
+// ═══════════════ ACTIONS ═══════════════
+const SKILL_ACTIONS={
+  woodcutting:[
+    {id:'birch',name:'Birch Tree',icon:'🌲',reqLv:1,xp:10,time:3.0,stam:0.4,yield:'Birch Logs',success:1.0,actionBonus:0},
+    {id:'oak',name:'Oak Tree',icon:'🌳',reqLv:10,xp:18,time:4.0,stam:1.0,yield:'Oak Logs',success:0.8,actionBonus:0.05},
+    {id:'ashwood',name:'Ashwood Tree',icon:'🌲',reqLv:25,xp:32,time:5.0,stam:2.5,yield:'Ashwood Logs',success:0.9,actionBonus:0.1},
+    {id:'yew',name:'Yew Tree',icon:'🌴',reqLv:45,xp:60,time:7.0,stam:4.5,yield:'Yew Logs',success:0.85,actionBonus:0.15},
+    {id:'emberheart',name:'Emberheart Tree',icon:'🌋',reqLv:65,xp:105,time:9.0,stam:6.5,yield:'Emberheart Logs',success:0.75,actionBonus:0.2},
+    {id:'voidwood',name:'Voidwood Bough',icon:'🌑',reqLv:95,xp:205,time:12.0,stam:9.5,yield:'Voidwood Logs',success:0.7,actionBonus:0.25}
+  ],
+  mining:[
+    {id:'copper',name:'Copper Ore',icon:'🟤',reqLv:1,xp:15,time:4.0,stam:0.8,yield:'Copper Ore',success:1.0,actionBonus:0},
+    {id:'iron',name:'Iron Ore',icon:'⬛',reqLv:15,xp:35,time:5.0,stam:1.5,yield:'Iron Ore',success:0.9,actionBonus:0.05},
+    {id:'gold_ore',name:'Gold Ore',icon:'🟡',reqLv:40,xp:80,time:8.0,stam:3.0,yield:'Gold Ore',success:0.75,actionBonus:0.1},
+    {id:'mithril',name:'Mithril',icon:'🔵',reqLv:60,xp:150,time:10.0,stam:5.0,yield:'Mithril Ore',success:0.65,actionBonus:0.15}
+  ],
+  fishing:[
+    {id:'sprat',name:'Sprat',icon:'🐟',reqLv:1,xp:8,time:4.0,stam:0.2,yield:'Raw Sprat',success:1.0,actionBonus:0},
+    {id:'shrimp',name:'Shrimp',icon:'🦐',reqLv:1,xp:10,time:5.0,stam:0.3,yield:'Raw Shrimp',success:1.0,actionBonus:0},
+    {id:'trout',name:'Trout',icon:'🐟',reqLv:20,xp:50,time:7.0,stam:1.0,yield:'Raw Trout',success:0.8,actionBonus:0.05}
+  ],
+  foraging:[
+    {id:'herbs',name:'Wild Herbs',icon:'🌿',reqLv:1,xp:8,time:4.0,stam:0.5,yield:'Wild Herbs',success:1.0,actionBonus:0},
+    {id:'mushroom',name:'Mushrooms',icon:'🍄',reqLv:10,xp:20,time:5.0,stam:0.8,yield:'Mushrooms',success:0.9,actionBonus:0.05},
+    {id:'starbloom',name:'Starbloom',icon:'🌸',reqLv:30,xp:55,time:8.0,stam:2.0,yield:'Starbloom',success:0.7,actionBonus:0.1}
+  ],
+  hunting:[
+    {id:'rabbit',name:'Rabbit',icon:'🐇',reqLv:1,xp:12,time:5.0,stam:0.6,yield:'Raw Rabbit',success:0.9,actionBonus:0},
+    {id:'deer',name:'Deer',icon:'🦌',reqLv:20,xp:45,time:8.0,stam:2.5,yield:'Raw Venison',success:0.75,actionBonus:0.05}
+  ],
+  stargazing:[
+    {id:'constell',name:'Constellations',icon:'✨',reqLv:1,xp:20,time:10.0,stam:0.2,yield:'Star Chart',success:0.8,actionBonus:0},
+    {id:'planets',name:'Planets',icon:'🪐',reqLv:15,xp:50,time:15.0,stam:0.5,yield:'Celestial Map',success:0.7,actionBonus:0.05}
+  ],
+  farming:[
+    {id:'hayseed',name:'Hayseed',icon:'🌾',reqLv:1,xp:6,time:8.0,stam:0.3,yield:'Hayseed',success:1.0,actionBonus:0},
+    {id:'lettuce',name:'Lettuce',icon:'🥬',reqLv:1,xp:10,time:12.0,stam:0.4,yield:'Lettuce',success:1.0,actionBonus:0},
+    {id:'wheat',name:'Wheat',icon:'🌾',reqLv:1,xp:8,time:30.0,stam:0.3,yield:'Wheat',success:1.0,actionBonus:0},
+    {id:'potatoes',name:'Potatoes',icon:'🥔',reqLv:10,xp:25,time:60.0,stam:0.5,yield:'Potatoes',success:0.9,actionBonus:0.05}
+  ]
+};
+const CRAFT_ACTIONS={
+  cooking:[
+    {id:'cook_sprat',name:'Cook Sprat',icon:'🐟',reqLv:1,xp:8,time:3.0,stam:0.3,yield:'Cooked Sprat',qty:1,success:0.6,ingredients:[{item:'Raw Sprat',qty:1}],actionBonus:0},
+    {id:'pickle_lettuce',name:'Pickle Lettuce',icon:'🥬',reqLv:1,xp:12,time:5.0,stam:0.3,yield:'Pickled Lettuce',qty:1,success:0.7,ingredients:[{item:'Lettuce',qty:1}],actionBonus:0},
+    {id:'cook_trout',name:'Cook Trout',icon:'🐟',reqLv:10,xp:16,time:4.0,stam:0.5,yield:'Cooked Trout',qty:1,success:0.6,ingredients:[{item:'Raw Trout',qty:1}],actionBonus:0.05},
+    {id:'cook_bass',name:'Cook Bass',icon:'🐠',reqLv:25,xp:30,time:5.0,stam:0.8,yield:'Cooked Bass',qty:1,success:0.6,ingredients:[{item:'Raw Bass',qty:1}],actionBonus:0.1},
+    {id:'sprat_souffle',name:'Sprat Soufflé',icon:'🍮',reqLv:15,xp:120,time:10.0,stam:1.5,yield:'Sprat Soufflé',qty:1,success:0.65,ingredients:[{item:'Cooked Sprat',qty:5},{item:'Pickled Lettuce',qty:2},{item:'Hayseed',qty:10}],actionBonus:0.1}
+  ],
+  smithing:[
+    {id:'copper_bar',name:'Copper Bar',icon:'🟤',reqLv:1,xp:20,time:5.0,stam:1.0,heat:40,yield:'Copper Bar',qty:1,success:0.85,ingredients:[{item:'Copper Ore',qty:3}],actionBonus:0},
+    {id:'iron_bar',name:'Iron Bar',icon:'⬛',reqLv:15,xp:45,time:7.0,stam:1.5,heat:90,yield:'Iron Bar',qty:1,success:0.8,ingredients:[{item:'Iron Ore',qty:3}],actionBonus:0.05},
+    {id:'gold_bar',name:'Gold Bar',icon:'🟡',reqLv:40,xp:100,time:10.0,stam:3.0,heat:200,yield:'Gold Bar',qty:1,success:0.7,ingredients:[{item:'Gold Ore',qty:4}],actionBonus:0.1}
+  ],
+  fletching:[
+    {id:'arrow',name:'Arrows',icon:'🏹',reqLv:1,xp:5,time:2.0,stam:0.2,yield:'Arrows',qty:10,success:0.9,ingredients:[{item:'Birch Logs',qty:1}],actionBonus:0},
+    {id:'oak_bow',name:'Oak Shortbow',icon:'🏹',reqLv:10,xp:40,time:8.0,stam:1.5,yield:'Oak Shortbow',qty:1,success:0.75,ingredients:[{item:'Oak Logs',qty:5}],actionBonus:0.05}
+  ],
+  alchemy:[
+    {id:'heal_pot',name:'Healing Potion',icon:'🧪',reqLv:1,xp:25,time:6.0,stam:0.5,yield:'Healing Potion',qty:1,success:0.7,ingredients:[{item:'Wild Herbs',qty:3},{item:'Mushrooms',qty:2}],actionBonus:0},
+    {id:'stam_pot',name:'Stamina Brew',icon:'🧪',reqLv:15,xp:50,time:8.0,stam:0.8,yield:'Stamina Brew',qty:1,success:0.65,ingredients:[{item:'Starbloom',qty:2},{item:'Wild Herbs',qty:2}],actionBonus:0.05},
+    {id:'tonic_vigor',name:'Tonic of Vigor',icon:'🧪',reqLv:20,xp:80,time:9.0,stam:1.0,yield:'Tonic of Vigor',qty:1,success:0.6,ingredients:[{item:'Raw Trout',qty:2},{item:'Wild Herbs',qty:3},{item:'Mushrooms',qty:2}],actionBonus:0.1},
+    {id:'antivenom',name:'Antivenom',icon:'🧪',reqLv:25,xp:90,time:9.0,stam:1.0,yield:'Antivenom',qty:1,success:0.55,ingredients:[{item:'Venom Sac',qty:1},{item:'Mushrooms',qty:3},{item:'Wild Herbs',qty:2}],actionBonus:0.1}
+  ],
+  plankmaking:[
+    {id:'birch_plank',name:'Birch Planks',icon:'🪵',reqLv:1,xp:16,time:4.0,stam:6,yield:'Birch Plank',qty:1,success:0.95,ingredients:[{item:'Birch Logs',qty:1}],actionBonus:0},
+    {id:'oak_plank',name:'Oak Planks',icon:'🪵',reqLv:12,xp:32,time:6.0,stam:8,yield:'Oak Plank',qty:1,success:0.9,ingredients:[{item:'Oak Logs',qty:1}],actionBonus:0.05},
+    {id:'ashwood_plank',name:'Ashwood Planks',icon:'🪵',reqLv:25,xp:56,time:8.0,stam:10,yield:'Ashwood Plank',qty:1,success:0.85,ingredients:[{item:'Ashwood Logs',qty:1}],actionBonus:0.1},
+    {id:'yew_plank',name:'Yew Planks',icon:'🪵',reqLv:45,xp:96,time:11.0,stam:13,yield:'Yew Plank',qty:1,success:0.8,ingredients:[{item:'Yew Logs',qty:1}],actionBonus:0.15}
+  ],
+  jewelcrafting:[
+    {id:'ember_jewel',name:'Ember Jewel',icon:'💎',reqLv:1,xp:140,time:12.0,stam:2.0,mana:8,heat:120,yield:'Ember Jewel',qty:1,success:0.4,ingredients:[{item:'Ash Crystal',qty:2},{item:'Gold Bar',qty:1},{item:'Emberheart Logs',qty:2}],actionBonus:0},
+    {id:'gilded_idol',name:'Gilded Idol',icon:'🗿',reqLv:15,xp:200,time:15.0,stam:3.0,mana:12,heat:180,yield:'Gilded Idol',qty:1,success:0.35,ingredients:[{item:'Gold Bar',qty:3},{item:'Starbloom',qty:3},{item:'Ashwood Logs',qty:3}],actionBonus:0.05},
+    {id:'void_gem',name:'Void Gem',icon:'🔮',reqLv:30,xp:320,time:18.0,stam:4.0,mana:18,heat:260,yield:'Void Gem',qty:1,success:0.3,ingredients:[{item:'Shadow Essence',qty:2},{item:'Mithril Ore',qty:3},{item:'Voidwood Logs',qty:2}],actionBonus:0.1}
+  ],
+  leatherwork:[],tailoring:[],enchanting:[]
+};
+
+// ═══════════════ MARKET ═══════════════
+const MBASE={'Birch Logs':8,'Oak Logs':15,'Ashwood Logs':28,'Yew Logs':52,'Emberheart Logs':95,'Voidwood Logs':180,
+'Copper Ore':12,'Iron Ore':25,'Gold Ore':75,'Mithril Ore':200,'Copper Bar':35,'Iron Bar':65,'Gold Bar':200,
+'Raw Shrimp':5,'Raw Trout':18,'Raw Sprat':4,'Raw Bass':22,'Hayseed':3,'Lettuce':5,'Pickled Lettuce':12,'Sprat Soufflé':95,'Wild Herbs':6,'Mushrooms':14,'Starbloom':40,
+'Raw Rabbit':10,'Raw Venison':30,'Star Chart':35,'Celestial Map':80,'Wheat':4,'Potatoes':10,
+'Cooked Sprat':7,'Cooked Trout':28,'Cooked Bass':38,'Arrows':8,'Oak Shortbow':85,
+'Healing Potion':50,'Stamina Brew':90,'Tonic of Vigor':110,'Antivenom':85,'Birch Plank':20,'Oak Plank':38,'Ashwood Plank':65,'Yew Plank':110,
+'Wolf Pelt':18,'Raw Meat':12,'Leather Scraps':9,'Bone Fragment':6,'Spider Silk':30,'Venom Sac':45,'Ectoplasm':55,'Ash Crystal':120,'Shadow Essence':200,
+'Ember Jewel':320,'Void Gem':600,'Gilded Idol':420,
+"Scout's Journal":40,'Thornwood Codex':70,'Drowned Tablet':130,'Ashen Grimoire':260};
+const MKT={};
+Object.keys(MBASE).forEach(k=>MKT[k]={price:MBASE[k],base:MBASE[k]});
+const INV={};
+
+// ═══════════════ ITEM METADATA: energy + consumption category ═══════════════
+// energy = heat value when destroyed (fuels crafting). cat = which population need it satisfies.
+// cat:'Material' = raw/intermediate input, NOT consumed directly by the population.
+// Defence is government-managed (the population cannot buy it directly).
+const CATEGORIES=['Housing','Food','Entertainment','Health','Tools','Luxury','Defence','Knowledge'];
+const ITEM_META={
+  // logs & ores: raw materials (plank/bar/luxury inputs + fuel). Not consumed directly.
+  'Birch Logs':{energy:8,cat:'Material'},'Oak Logs':{energy:14,cat:'Material'},'Ashwood Logs':{energy:22,cat:'Material'},
+  'Yew Logs':{energy:34,cat:'Material'},'Emberheart Logs':{energy:60,cat:'Material'},'Voidwood Logs':{energy:110,cat:'Material'},
+  'Copper Ore':{energy:6,cat:'Material'},'Iron Ore':{energy:10,cat:'Material'},'Gold Ore':{energy:18,cat:'Material'},'Mithril Ore':{energy:40,cat:'Material'},
+  // TOOLS: refined, heat-heavy bars
+  'Copper Bar':{energy:14,cat:'Tools'},'Iron Bar':{energy:24,cat:'Tools'},'Gold Bar':{energy:55,cat:'Tools'},
+  // FOOD: the only mass-producible consumption category
+  'Raw Shrimp':{energy:4,cat:'Food'},'Raw Trout':{energy:9,cat:'Material'},'Raw Sprat':{energy:3,cat:'Food'},'Raw Bass':{energy:11,cat:'Food'},
+  'Hayseed':{energy:2,cat:'Food'},'Lettuce':{energy:3,cat:'Food'},'Pickled Lettuce':{energy:5,cat:'Food'},'Sprat Soufflé':{energy:30,cat:'Food'},
+  'Wild Herbs':{energy:3,cat:'Material'},'Mushrooms':{energy:5,cat:'Material'},'Starbloom':{energy:12,cat:'Material'},
+  'Raw Rabbit':{energy:7,cat:'Food'},'Raw Venison':{energy:14,cat:'Food'},
+  'Wheat':{energy:2,cat:'Food'},'Potatoes':{energy:4,cat:'Food'},
+  'Cooked Sprat':{energy:6,cat:'Food'},'Cooked Trout':{energy:14,cat:'Food'},'Cooked Bass':{energy:18,cat:'Food'},
+  // ENTERTAINMENT: stargazing outputs — raw, no other use
+  'Star Chart':{energy:10,cat:'Entertainment'},'Celestial Map':{energy:22,cat:'Entertainment'},
+  // DEFENCE: items carrying the defence attribute (government converts these into the Defence stock)
+  'Arrows':{energy:5,cat:'Defence'},'Oak Shortbow':{energy:30,cat:'Defence'},
+  // HEALTH: complex multi-source potions; Wild Herbs/Mushrooms are the shared variable-demand inputs
+  'Healing Potion':{energy:20,cat:'Health'},'Stamina Brew':{energy:32,cat:'Health'},'Tonic of Vigor':{energy:34,cat:'Health'},'Antivenom':{energy:30,cat:'Health'},
+  // HOUSING: planks — always consume a raw log to craft
+  'Birch Plank':{energy:14,cat:'Housing'},'Oak Plank':{energy:24,cat:'Housing'},'Ashwood Plank':{energy:40,cat:'Housing'},'Yew Plank':{energy:70,cat:'Housing'},
+  // combat materials → Material; one tome per region → Knowledge
+  'Wolf Pelt':{energy:12,cat:'Material'},'Raw Meat':{energy:8,cat:'Food'},'Leather Scraps':{energy:6,cat:'Material'},
+  'Bone Fragment':{energy:4,cat:'Material'},'Spider Silk':{energy:20,cat:'Material'},'Venom Sac':{energy:28,cat:'Material'},
+  'Ectoplasm':{energy:36,cat:'Material'},'Ash Crystal':{energy:80,cat:'Material'},'Shadow Essence':{energy:130,cat:'Material'},
+  // LUXURY: refined rare goods (low success, high heat, consume raw mats + mana to make)
+  'Ember Jewel':{energy:90,cat:'Luxury'},'Void Gem':{energy:150,cat:'Luxury'},'Gilded Idol':{energy:120,cat:'Luxury'},
+  // KNOWLEDGE: one tome per combat region — population buys the MOST expensive
+  "Scout's Journal":{energy:10,cat:'Knowledge'},'Thornwood Codex':{energy:18,cat:'Knowledge'},'Drowned Tablet':{energy:30,cat:'Knowledge'},'Ashen Grimoire':{energy:55,cat:'Knowledge'}
+};
+function itemEnergy(name){return ITEM_META[name]?.energy||1;}
+function itemCat(name){return ITEM_META[name]?.cat||'Material';}
+// items carrying the defence attribute (components the government can convert into Defence)
+function defenceComponents(){return Object.keys(MKT).filter(n=>itemCat(n)==='Defence');}
+
+// HEAT: stored crafting fuel. Crafting consumes heat per craft.
+// Heat is generated by buying the best energy/gold items from market and destroying them.
+let HEAT=0;
+function energyPerGold(name){return itemEnergy(name)/(MKT[name]?.price||1);}
+// auto-buy the single best energy/gold item to gain `need` heat. Returns heat gained.
+function buyHeat(need){
+  let gained=0,guard=0;
+  while(gained<need&&guard++<200){
+    // find best energy/gold item we can afford (floored items are free → preferred fuel)
+    let best=null,bestEpg=0;
+    Object.keys(MKT).forEach(name=>{
+      const epg=isFloored(name)?Infinity:energyPerGold(name);
+      if(epg>bestEpg&&G.gold>=Math.ceil(mktPrice(name))){bestEpg=epg;best=name;}
+    });
+    if(!best)break;
+    const cost=Math.ceil(mktPrice(best));
+    G.gold-=cost;gained+=itemEnergy(best);
+    if(isFloored(best))drawFloor(best,1); else adjustMktPrice(best,0.02); // burning demand pushes price up
+  }
+  HEAT+=gained;
+  return gained;
+}
+// ensure at least `need` heat available, buying more if short. Returns true if satisfied.
+function ensureHeat(need){
+  if(HEAT>=need)return true;
+  buyHeat(need-HEAT);
+  return HEAT>=need;
+}
+
+
+// ═══════════════ GOVERNMENT ═══════════════
+const GOV={treasury:0,taxRate:0.05,collectedToday:0,npcContribToday:0};
+// Centralised gold gain with 5% tax skimmed to the treasury.
+function gainGold(amount){
+  if(amount<=0){G.gold+=amount;return amount;}
+  const tax=Math.floor(amount*GOV.taxRate);
+  GOV.treasury+=tax;GOV.collectedToday+=tax;
+  G.gold+=(amount-tax);
+  return amount-tax;
+}
+
+// ═══════════════ ECONOMY: population & consumption ═══════════════
+const ECONOMY={
+  npcPop:240,            // base NPC population
+  consumeTimer:0,        // counts to 300s (5 min)
+  consumeInterval:300,
+  lastConsume:[],        // log of last cycle's purchases
+};
+function totalPopulation(){
+  // players = you + thieves + police (NPCs). Each unit of pop consumes.
+  const players=1+THIEF_NPC_COUNT+POLICE.length+(G.myThief?1:0)+(G.myPolice?1:0);
+  return ECONOMY.npcPop+players;
+}
+// items available in a category, sorted cheapest first
+function categoryItems(cat){
+  return Object.keys(MKT).filter(n=>itemCat(n)===cat).sort((a,b)=>MKT[a].price-MKT[b].price);
+}
+// items the population targets in a category, in priority order.
+// Knowledge → most expensive first (prestige). Everything else → cheapest first.
+function categoryTargets(cat){
+  const items=Object.keys(MKT).filter(n=>itemCat(n)===cat);
+  if(cat==='Knowledge')return items.sort((a,b)=>MKT[b].price-MKT[a].price);
+  return items.sort((a,b)=>MKT[a].price-MKT[b].price);
+}
+// categories the population actually buys (Defence is government-managed → excluded)
+function consumableCategories(){return CATEGORIES.filter(c=>c!=='Defence');}
+// Run one population consumption cycle: for each consumable category, buy & destroy
+// (population / categoryCount) worth of the population's target item. Drives demand → price up,
+// which lets the cheapest item rotate (esp. Health, whose potions share variable-demand inputs).
+function runConsumption(){
+  const pop=totalPopulation();
+  const cats=consumableCategories();
+  const perCat=Math.max(1,Math.floor(pop/cats.length));
+  const log=[];
+  cats.forEach(cat=>{
+    const ranked=categoryTargets(cat);
+    if(!ranked.length)return;
+    const target=ranked[0];
+    const spent=Math.ceil(mktPrice(target)*perCat);
+    const tax=Math.floor(spent*GOV.taxRate);
+    GOV.treasury+=tax;GOV.npcContribToday+=tax;
+    if(isFloored(target))drawFloor(target,perCat); // demand eats the buffer before price can rise
+    else adjustMktPrice(target,perCat*0.015);      // demand pushes the target's price up
+    log.push({cat,item:target,qty:perCat,spent,tax});
+  });
+  ECONOMY.lastConsume=log;
+}
+
+
+// ═══════════════ ACTIVE TASKS ═══════════════
+const ACTIVE_SK={};
+const ACTIVE_CR={};
+
+// ═══════════════ LAND ═══════════════
+const LAND=[];
+const BLDEFS={
+  sawmill:{name:'🪵 Sawmill',cost:200,output:'Birch Logs',speed:5,upgCost:300},
+  forge:{name:'⚒ Forge',cost:350,output:'Copper Bar',speed:8,upgCost:450},
+  farm:{name:'🌾 Farm',cost:150,output:'Wheat',speed:30,upgCost:200},
+  fishery:{name:'🎣 Fishery',cost:180,output:'Raw Shrimp',speed:6,upgCost:250},
+  mine:{name:'⛏ Mine',cost:300,output:'Copper Ore',speed:7,upgCost:400},
+  alchemylab:{name:'⚗ Alchemy Lab',cost:400,output:'Healing Potion',speed:12,upgCost:500}
+};
+let selectedPlot=null;
+
+// ═══════════════ THIEVING ═══════════════
+const ZONES=[
+  {id:'embergate',name:'Embergate Outskirts'},
+  {id:'thornwood',name:'The Thornwood'},
+  {id:'fenmarch',name:'The Fenmarch'},
+  {id:'ashreach',name:'Ashreach Wilds'},
+  {id:'sunless',name:'The Sunless Reach'},
+  {id:'voidmaw',name:'The Voidmaw'}
+];
+const THV_ACTIONS={
+  embergate:{picks:[
+    {id:'merchant',name:"Merchant's Purse",icon:'👛',reqLv:1,reward:[40,70],success:0.90,time:5.0,xp:45},
+    {id:'guard_patrol',name:'Guard Patrol',icon:'🛡',reqLv:10,reward:[80,130],success:0.80,time:7.0,xp:85}
+  ],heists:[
+    {id:'market_stall',name:'Market Stall',icon:'🏪',reqLv:5,reward:[100,180],success:0.75,time:10.0,xp:110},
+    {id:'tax_cart',name:'Tax Cart',icon:'🛒',reqLv:20,reward:[200,350],success:0.60,time:15.0,xp:200}
+  ]},
+  thornwood:{picks:[
+    {id:'wood_traveler',name:'Travelling Merchant',icon:'🧳',reqLv:15,reward:[50,110],success:0.85,time:5.0,xp:100}
+  ],heists:[
+    {id:'keep_safe',name:'Keep Safe',icon:'🏰',reqLv:25,reward:[150,280],success:0.70,time:12.0,xp:180}
+  ]},
+  fenmarch:{picks:[
+    {id:'marsh_smuggler',name:'Marsh Smuggler',icon:'🏴',reqLv:35,reward:[70,160],success:0.95,time:5.0,xp:196},
+    {id:'tax_collector',name:'Tax Collector',icon:'📋',reqLv:46,reward:[110,240],success:0.89,time:5.4,xp:211}
+  ],heists:[
+    {id:'fen_warehouse',name:'Fen Warehouse',icon:'🏚',reqLv:40,reward:[160,360],success:0.94,time:9.6,xp:250},
+    {id:'drowned_vault',name:'Drowned Temple Vault',icon:'🏛',reqLv:58,reward:[280,560],success:0.73,time:11.0,xp:380}
+  ]},
+  ashreach:{picks:[
+    {id:'warden',name:"Warden's Pack",icon:'🪖',reqLv:50,reward:[120,250],success:0.82,time:5.5,xp:220}
+  ],heists:[
+    {id:'ruin_cache',name:'Ruin Cache',icon:'🗿',reqLv:55,reward:[300,600],success:0.65,time:14.0,xp:400}
+  ]},
+  sunless:{picks:[
+    {id:'shade_courier',name:'Shade Courier',icon:'👤',reqLv:70,reward:[200,400],success:0.80,time:6.0,xp:380}
+  ],heists:[
+    {id:'sunless_vault',name:'Sunless Vault',icon:'⬛',reqLv:75,reward:[600,1200],success:0.55,time:20.0,xp:700}
+  ]},
+  voidmaw:{picks:[
+    {id:'void_herald',name:'Void Herald',icon:'🌑',reqLv:90,reward:[350,700],success:0.75,time:7.0,xp:600}
+  ],heists:[
+    {id:'void_heart',name:'The Void Heart',icon:'💜',reqLv:95,reward:[1000,2500],success:0.45,time:30.0,xp:1200}
+  ]}
+};
+const THIEF_NPC_COUNT=3;
+const POLICE=[{name:'Guard Maren',role:'police'},{name:'Seff',role:'corrupt'}];
+let ACTIVE_THV=null;
+let ACTIVE_THV_TIMER=0;
+let THV_ZONE='embergate';
+let THV_LYING_LOW=false;
+let THV_LL_TIMER=0;
+
+// ═══════════════ STANDING STONES ═══════════════
+const STONES=[
+  {id:'plenty',name:'Stone of Plenty',icon:'🌾',desc:'Gather yields swell beneath its light.',boonKey:'gatherYield',boonBase:0.07,boonPerLv:0.03,boonMax:0.39},
+  {id:'hunt',name:'Stone of the Hunt',icon:'⚔',desc:'Fallen foes spill more gold.',boonKey:'combatGold',boonBase:0.10,boonPerLv:0.04,boonMax:0.52},
+  {id:'sage',name:'Stone of the Sage',icon:'📖',desc:'All your toil teaches you more.',boonKey:'allXP',boonBase:0.05,boonPerLv:0.02,boonMax:0.26},
+  {id:'gem',name:'Stone of the Seeker',icon:'💎',desc:'The earth opens its hidden veins.',boonKey:'gemFind',boonBase:0.36,boonPerLv:0.15,boonMax:1.95},
+  {id:'shadow',name:'Stone of Shadows',icon:'🌑',desc:'Quick hands, quiet steps.',boonKey:'thievingSpeed',boonBase:0.08,boonPerLv:0.03,boonMax:0.32}
+];
+
+// ═══════════════ RESEARCH (generated) ═══════════════
+// Three families, one research per member:
+//  • Tooling   — per gathering skill; +1 to that skill's MAX tool level per level.
+//  • Attribute — per stat; +1 to that stat per level.
+//  • Methodology — per research TYPE; −1% failure to all research of that type per level.
+// Unlimited levels: cost ×4, failure-lots ×4, +5% failure each level. Cost is paid in a
+// consumption category (items bought from market & destroyed); gold value is shown.
+// Each research has BAUBLES_PER baubles. Studying a bauble earns its owner a share of all
+// research gold spent (studiers collectively get 50%) and shaves 1% off that research's failure.
+const BAUBLES_PER=5;
+const RES_CONSUME_CATS=['Housing','Food','Entertainment','Health','Tools','Luxury','Knowledge']; // Defence excluded (gov-only)
+const GATHER_SKILLS=SKILLS.filter(s=>s.id!=='thieving'); // skills with an Upgrade Tool button
+const STAT_LIST=[...new Set([...SKILLS,...CRAFT_SKILLS].map(s=>s.stat))];
+// every skill that has actions gets Speed (+5%) and Production (+5%) research
+const SPEEDABLE_SKILLS=[...GATHER_SKILLS,...CRAFT_SKILLS.filter(s=>(CRAFT_ACTIONS[s.id]||[]).length>0)];
+const BASE_TOOL_MAX=5; // tool level cap before any Tooling research
+
+const RESEARCH=[];
+let _resCatIdx=0;
+function _addRes(o){o.cat=RES_CONSUME_CATS[_resCatIdx++%RES_CONSUME_CATS.length];RESEARCH.push(o);}
+GATHER_SKILLS.forEach(s=>_addRes({id:'tool_'+s.id,name:s.name+' Toolcraft',type:'Tooling',effect:'toolMax',target:s.id,
+  desc:'+1 to maximum '+s.name+' tool level',baseQty:40,baseLots:8,baseFail:0.10}));
+SPEEDABLE_SKILLS.forEach(s=>_addRes({id:'speed_'+s.id,name:s.name+' Efficiency',type:'Speed',effect:'speed',target:s.id,
+  desc:'+5% '+s.name+' speed (additive)',baseQty:45,baseLots:9,baseFail:0.11}));
+SPEEDABLE_SKILLS.forEach(s=>_addRes({id:'prod_'+s.id,name:s.name+' Yield',type:'Production',effect:'prod',target:s.id,
+  desc:'+5% '+s.name+' production (additive)',baseQty:45,baseLots:9,baseFail:0.11}));
+STAT_LIST.forEach(st=>_addRes({id:'stat_'+st,name:st+' Doctrine',type:'Attribute',effect:'stat',target:st,
+  desc:'+1 to '+st,baseQty:50,baseLots:10,baseFail:0.12}));
+// a Methodology research for every research TYPE (−1% failure to that type per level)
+[...new Set(RESEARCH.map(r=>r.type)),'Methodology'].forEach(t=>_addRes({id:'method_'+t,name:t+' Methodology',type:'Methodology',effect:'failType',target:t,
+  desc:'−1% failure for all '+t+' research',baseQty:60,baseLots:12,baseFail:0.15}));
+
+const MY_RES={};      // id -> levels you've completed
+const FAIL_POOL={};   // id -> accumulated insurance % (built by failures, spent per-lot to offset failure)
+const RES_STATE={};   // id -> {globalLv, studyPtr, originator, baubles:[{owner,studies}]}
+RESEARCH.forEach(r=>{RES_STATE[r.id]={globalLv:0,studyPtr:0,originator:null,baubles:Array.from({length:BAUBLES_PER},()=>({owner:null,studies:0}))};});
+const RES_GLOBAL={baubleMax:0};
+const RES_WORLD={timer:0,interval:6};
+const RESEARCHERS=['Magister Veyl','Adept Soren','Scholar Pell','Savant Iri','Curator Bram'];
+
+// ── effect accessors ──
+function resLevel(id){return MY_RES[id]||0;}
+function maxToolLv(skId){const r=RESEARCH.find(x=>x.effect==='toolMax'&&x.target===skId);return BASE_TOOL_MAX+(r?resLevel(r.id):0);}
+function statResearchBonus(stat){const r=RESEARCH.find(x=>x.effect==='stat'&&x.target===stat);return r?resLevel(r.id):0;}
+function typeFailReduction(type){const r=RESEARCH.find(x=>x.effect==='failType'&&x.target===type);return r?resLevel(r.id):0;}
+function resLevelByEffect(effect,target){const r=RESEARCH.find(x=>x.effect===effect&&x.target===target);return r?resLevel(r.id):0;}
+function prodMult(skId){return 1+0.05*resLevelByEffect('prod',skId);} // +5% production per level (additive)
+// spend this research's insurance pool against one lot's failure → returns the effective failure fraction.
+// e.g. pool 12%, lot fail 9% → lot1 returns 0 (pool→3), lot2 returns 0.06 (pool→0), lot3 returns 0.09.
+function applyFailPool(id,failFraction){
+  const lotPct=failFraction*100;
+  const cover=Math.min(FAIL_POOL[id]||0,lotPct);
+  FAIL_POOL[id]=(FAIL_POOL[id]||0)-cover;
+  return (lotPct-cover)/100;
+}
+
+// ── cost / failure / time scaling (4×, +5%/level) ──
+function resQty(r,lv){return Math.ceil(r.baseQty*Math.pow(4,lv));}
+function resLots(r,lv){return Math.ceil(r.baseLots*Math.pow(4,lv));}
+function baubleStudies(id){return RES_STATE[id].baubles.reduce((s,b)=>s+b.studies,0);}
+function resFail(r,lv){
+  let f=r.baseFail+0.05*lv;            // +5% per level
+  f-=0.01*baubleStudies(r.id);          // each completed study shaves 1%
+  f-=0.01*typeFailReduction(r.type);    // methodology
+  return Math.max(0.02,Math.min(0.95,f));
+}
+function catUnitPrice(cat){const t=categoryTargets(cat)[0];return t?mktPrice(t):0;}
+function resGoldCost(r,lv){return Math.ceil(resQty(r,lv)*catUnitPrice(r.cat));}
+
+// consume `qty` units of a category from the market (buy target & destroy). returns gold spent.
+function consumeCategory(cat,qty){
+  const t=categoryTargets(cat)[0];if(!t)return 0;
+  const cost=Math.ceil(mktPrice(t)*qty);
+  G.gold-=cost;
+  if(isFloored(t))drawFloor(t,qty); else adjustMktPrice(t,qty*0.005);
+  return cost;
+}
+// studiers collectively get 50% of `goldSpent` (each owned bauble = goldSpent/(2N)).
+// player-owned baubles credit the player; NPC-owned shares leave the economy.
+function payStudyPool(id,goldSpent){
+  const st=RES_STATE[id],share=Math.min(1e7,Math.floor(goldSpent/(2*BAUBLES_PER)));
+  let toYou=0;st.baubles.forEach(b=>{if(b.owner==='You')toYou+=share;});
+  if(toYou>0){G.gold+=toYou;updateGold();}
+  return toYou;
+}
+// gentle notional spend used for NPC-driven royalties (keeps the 4× curve from exploding the economy)
+function npcResearchSpend(r){return Math.ceil(resGoldCost(r,0)*(1+RES_STATE[r.id].globalLv*0.5));}
+
+// complete one study of bauble `idx` on research `id` by `who` ('You' or an NPC name)
+function completeStudy(id,idx,who){
+  const st=RES_STATE[id],b=st.baubles[idx];
+  if(b.owner===who){
+    // already own it & first studier → knock a random OTHER owner out of the pool (take a bauble)
+    const others=[...new Set(st.baubles.map(x=>x.owner).filter(o=>o&&o!==who))];
+    if(others.length){
+      const victim=others[Math.floor(Math.random()*others.length)];
+      const vb=st.baubles.find(x=>x.owner===victim);
+      if(vb)vb.owner=who;
+      if(who==='You')notify('You forced '+victim+' out of the '+RESEARCH.find(r=>r.id===id).name+' study pool');
+    }
+  } else {
+    b.owner=who; // claim the bauble (the previous owner loses their gold share on it)
+  }
+  b.studies+=1;                 // failure for this bauble (and the research) drops 1%
+  st.studyPtr=(idx+1)%BAUBLES_PER; // sequential wrap
+  RES_GLOBAL.baubleMax=Math.max(RES_GLOBAL.baubleMax,b.studies);
+}
+// NPC researchers raise global levels (paying study royalties + originator tithes) and study baubles
+function researchWorldTick(){
+  const r=RESEARCH[Math.floor(Math.random()*RESEARCH.length)];
+  const st=RES_STATE[r.id];
+  const npc=RESEARCHERS[Math.floor(Math.random()*RESEARCHERS.length)];
+  if(Math.random()<0.5){
+    if(st.globalLv===0&&!st.originator)st.originator=npc; // first to crack it becomes the originator
+    st.globalLv+=1;
+    const spend=npcResearchSpend(r);
+    let earn=payStudyPool(r.id,spend);                    // your bauble royalties
+    if(st.originator==='You')earn+=Math.floor(spend*0.10); // 10% originator tithe to you
+    if(earn>0){if(st.originator==='You')G.gold+=Math.floor(spend*0.10);updateGold();
+      feedAdd([{t:'📚 +'+earn.toLocaleString()+'g from '+r.name+' ('+npc+')',c:'fc-pos'}]);}
+  }
+  if(Math.random()<0.35){
+    const idx=st.studyPtr,before=st.baubles[idx].owner;
+    completeStudy(r.id,idx,npc);
+    if(before==='You'&&st.baubles[idx].owner!=='You')feedAdd([{t:'📉 '+npc+' took your '+r.name+' bauble',c:'fc-neg'}]);
+  }
+  const ap=document.querySelector('.panel.active');
+  if(ap&&ap.id==='tab-research')renderResearch();
+}
+
+// ═══════════════ COMBAT ═══════════════
+const CBT_ZONES=[
+  {id:'embergate',name:'Embergate',enemies:[
+    {name:'Scrub Wolf',sprite:'🐺',hp:80,atk:8,def:3,xp:60,gold:[10,20],drops:['Wolf Pelt','Raw Meat',"Scout's Journal"]},
+    {name:'Bandit Scout',sprite:'🗡',hp:100,atk:12,def:5,xp:90,gold:[15,30],drops:['Leather Scraps','Copper Ore',"Scout's Journal"]}
+  ]},
+  {id:'thornwood',name:'Thornwood',enemies:[
+    {name:'Thornwood Spider',sprite:'🕷',hp:120,atk:15,def:4,xp:120,gold:[18,35],drops:['Spider Silk','Venom Sac','Thornwood Codex']},
+    {name:'Forest Bandit',sprite:'🏹',hp:150,atk:18,def:8,xp:150,gold:[25,50],drops:['Leather Scraps','Thornwood Codex']}
+  ]},
+  {id:'fenmarch',name:'Fenmarch',enemies:[
+    {name:'Risen Skeleton',sprite:'💀',hp:200,atk:22,def:10,xp:200,gold:[40,80],drops:['Bone Fragment','Iron Ore','Drowned Tablet']},
+    {name:'Fen Wraith',sprite:'👻',hp:180,atk:28,def:6,xp:220,gold:[50,90],drops:['Ectoplasm','Starbloom','Drowned Tablet']}
+  ]},
+  {id:'ashreach',name:'Ashreach',enemies:[
+    {name:'Ash Golem',sprite:'🗿',hp:350,atk:35,def:20,xp:400,gold:[80,160],drops:['Ash Crystal','Mithril Ore','Ashen Grimoire']},
+    {name:'Shadow Stalker',sprite:'🌑',hp:280,atk:42,def:12,xp:450,gold:[90,180],drops:['Shadow Essence','Yew Logs','Ashen Grimoire']}
+  ]}
+];
+let cbtEnemy=null;
+let cbtFightInterval=null;
+let currentCbtZone='fenmarch';
+
+// ═══════════════ VARS ═══════════════
+let currentSkill='woodcutting';
+let currentCraft='cooking';
+let notifTimer=null;
+let lastTick=Date.now();
+
+// ═══════════════ HELPERS ═══════════════
+function lvToXp(lv){return Math.floor(50*Math.pow(2,lv-1))}
+function getIcon(n){
+  const m={'Birch Logs':'🪵','Oak Logs':'🪵','Ashwood Logs':'🪵','Yew Logs':'🪵','Emberheart Logs':'🔥','Voidwood Logs':'🌑',
+  'Copper Ore':'🟤','Iron Ore':'⬛','Gold Ore':'🟡','Mithril Ore':'🔵','Copper Bar':'🟤','Iron Bar':'⬛','Gold Bar':'🟡',
+  'Raw Shrimp':'🦐','Raw Trout':'🐟','Raw Sprat':'🐟','Raw Bass':'🐠','Hayseed':'🌾','Lettuce':'🥬','Pickled Lettuce':'🥒','Sprat Soufflé':'🍮','Wild Herbs':'🌿','Mushrooms':'🍄','Starbloom':'🌸',
+  'Raw Rabbit':'🐇','Raw Venison':'🥩','Star Chart':'📜','Celestial Map':'🗺','Wheat':'🌾','Potatoes':'🥔',
+  'Cooked Sprat':'🍽','Cooked Trout':'🍽','Cooked Bass':'🍽','Arrows':'🏹','Oak Shortbow':'🏹',
+  'Healing Potion':'🧪','Stamina Brew':'🧪','Tonic of Vigor':'🧪','Antivenom':'🧪','Birch Plank':'🪵','Oak Plank':'🪵','Ashwood Plank':'🪵','Yew Plank':'🪵',
+  'Wolf Pelt':'🐺','Raw Meat':'🥩','Leather Scraps':'🧶','Bone Fragment':'🦴','Spider Silk':'🕸',
+  'Venom Sac':'💚','Ectoplasm':'👻','Ash Crystal':'💎','Shadow Essence':'🌑',
+  'Ember Jewel':'💎','Void Gem':'🔮','Gilded Idol':'🗿',
+  "Scout's Journal":'📔','Thornwood Codex':'📗','Drowned Tablet':'📜','Ashen Grimoire':'📕'};
+  return m[n]||'📦';
+}
+function notify(msg,dur=2500){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.style.opacity='1';
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>el.style.opacity='0',dur);
+}
+function getResBonus(skId){return 1+0.05*resLevelByEffect('speed',skId);} // Speed research: +5% additive per level
+function getStoneBonus(key){
+  if(!G.attunedStone)return 1.0;
+  const s=STONES.find(x=>x.id===G.attunedStone);
+  if(!s||s.boonKey!==key)return 1.0;
+  const sg=SKILLS.find(s=>s.id==='stargazing')?.lv||1;
+  return 1+(s.boonBase+(sg/10)*s.boonPerLv);
+}
+function getStatBonus(sk){return 1+(sk.statBonus*((sk.lv+statResearchBonus(sk.stat))/10))}
+function speedMult(sk,a){
+  return getStatBonus(sk)*(1+(sk.mastery[a.id]||0)*0.01)*(1+sk.groupMastery*0.003)*(1+sk.toolLv*0.1)*getResBonus(sk.id)*getStoneBonus('allXP')*(1+(a.actionBonus||0));
+}
+function effTime(sk,a){return a.time/speedMult(sk,a)}
+function xphCalc(sk,a){const t=effTime(sk,a);return Math.floor(a.xp*a.success*3600/t)}
+function gphCalc(sk,a){const t=effTime(sk,a);return Math.floor((MKT[a.yield]?.price||0)*a.success*3600/t)}
+function sphCalc(sk,a){const t=effTime(sk,a);return Math.floor(a.stam*3600/t)}
+function getThiefPenalty(){return Math.min(0.6,(THIEF_NPC_COUNT+(G.myThief?1:0))*0.03)}
+function sellPrice(item,qty){
+  const pen=getThiefPenalty();
+  const eye=MY_RES['market_eye1']?1.05:1.0;
+  return Math.floor((MKT[item]?.price||1)*qty*(1-pen)*eye);
+}
+function updateGold(){document.getElementById('gval').textContent=Math.floor(G.gold).toLocaleString();}
+function updatePools(){
+  const hP=G.hp/G.hpMax*100,sP=G.sp/G.spMax*100,mP=G.mp/G.mpMax*100;
+  document.getElementById('hp-fill').style.width=hP+'%';
+  document.getElementById('sp-fill').style.width=sP+'%';
+  document.getElementById('mp-fill').style.width=mP+'%';
+  document.getElementById('hp-val').textContent=Math.floor(G.hp)+'/'+G.hpMax;
+  document.getElementById('sp-val').textContent=Math.floor(G.sp)+'/'+G.spMax;
+  document.getElementById('mp-val').textContent=Math.floor(G.mp)+'/'+G.mpMax;
+}
+// ── Price floor with hysteresis ──
+// An over-produced item bottoms out, parks at 0g, and its producers pause (no flap to 0.1g).
+// It only rises again after FLOOR_BUFFER units are consumed (population / crafting / heat-burning).
+const FLOOR_EPS=0.05, FLOOR_BUFFER=100;
+function isFloored(name){return !!(MKT[name]&&MKT[name].floored);}
+// effective buy price: 0 for floored items (free), real price otherwise, 1 only for items absent from market
+function mktPrice(name){const m=MKT[name];if(!m)return 1;return m.floored?0:m.price;}
+function adjustMktPrice(name,delta){
+  const m=MKT[name];if(!m)return;
+  if(m.floored)return; // while floored, demand can't lift price directly — the buffer must drain first
+  m.price=Math.max(0,m.price*(1+delta));
+  if(m.price<=FLOOR_EPS){m.floored=true;m.price=0;m.absorb=FLOOR_BUFFER;}
+}
+// consuming `units` of a floored item drains its buffer; once empty it un-floors and may rise again
+function drawFloor(name,units){
+  const m=MKT[name];if(!m||!m.floored)return;
+  m.absorb=(m.absorb||0)-units;
+  if(m.absorb<=0){m.floored=false;m.absorb=0;m.price=0.1;} // released just above floor so demand lifts it
+}
+
+// ═══════════════ TABS ═══════════════
+document.querySelectorAll('.mtab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.mtab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    const id=t.dataset.tab;
+    document.getElementById('tab-'+id).classList.add('active');
+    ({profile:renderProfile,skilling:renderSkilling,crafting:renderCrafting,market:renderMarket,
+      thieving:renderThieving,research:renderResearch,combat:renderCombat})[id]?.();
+  };
+});
+
+// ═══════════════ SKILLING ═══════════════
+function renderSkilling(){
+  const tabs=document.getElementById('sk-tabs');tabs.innerHTML='';
+  SKILLS.filter(s=>s.id!=='thieving').forEach(s=>{
+    const b=document.createElement('button');b.className='stab'+(s.id===currentSkill?' active':'');
+    b.textContent=s.icon+' '+s.name+' '+s.lv;b.onclick=()=>{currentSkill=s.id;renderSkilling()};
+    tabs.appendChild(b);
+  });
+  const sk=SKILLS.find(s=>s.id===currentSkill);
+  const xpNext=lvToXp(sk.lv),xpPct=Math.min(100,sk.xp/xpNext*100);
+  document.getElementById('sk-name').textContent=sk.icon+' '+sk.name;
+  document.getElementById('sk-lv').textContent='Lv '+sk.lv;
+  document.getElementById('sk-xpbar').style.width=xpPct+'%';
+  document.getElementById('sk-xplbl').textContent=sk.xp+'/'+xpNext;
+  document.getElementById('sk-prog-bar2').style.width=xpPct+'%';
+  document.getElementById('sk-xplbl2').textContent='Lv '+sk.lv+' → '+(sk.lv+1);
+  document.getElementById('sk-stat').textContent=sk.stat;
+  document.getElementById('sk-tool').textContent=sk.toolName+' (Lv '+sk.toolLv+')';
+  const sampleA=(SKILL_ACTIONS[sk.id]||[])[0]||{actionBonus:0,id:'x',mastery:0};
+  document.getElementById('sk-speed').textContent=speedMult(sk,sampleA).toFixed(2)+'×';
+  document.getElementById('sk-gmastery').textContent='+'+sk.groupMastery+'%';
+  const stonesBtn=document.getElementById('sk-stones-btn');
+  if(stonesBtn)stonesBtn.style.display=(currentSkill==='stargazing')?'':'none';
+  document.getElementById('sk-header-desc').innerHTML='Trains: <span style="color:var(--amber3)">'+sk.name+' XP</span> · <span style="color:var(--teal3)">'+sk.stat+'</span>';
+  const grid=document.getElementById('action-grid');grid.innerHTML='';
+  (SKILL_ACTIONS[currentSkill]||[]).forEach(a=>{
+    const locked=sk.lv<a.reqLv,running=ACTIVE_SK[currentSkill]?.action===a.id;
+    const prog=running?(ACTIVE_SK[currentSkill].prog*100).toFixed(0):0;
+    const isTraining=running&&ACTIVE_SK[currentSkill]?.mode==='train';
+    const d=document.createElement('div');d.className='ac'+(locked?' locked':'')+(running?' running':'');
+    d.innerHTML=`<div class="ac-head"><div class="ac-icon">${a.icon}</div><div class="ac-meta">
+      <div class="ac-name ${locked?'locked-name':''}">${a.name} <span class="badge lv">Lv ${a.reqLv}</span></div>
+      <div class="ac-stats">→ ${getIcon(a.yield)} ${a.yield} · ${(effTime(sk,a)).toFixed(1)}s · ${Math.floor(a.success*100)}% · ⚡${a.stam}/act</div>
+      <div class="ac-xp">≈${xphCalc(sk,a).toLocaleString()} XP/hr · 🪙 ${gphCalc(sk,a).toLocaleString()} g/hr · Mastery <span id="mast-sk-${a.id}">${sk.mastery[a.id]||0}</span></div>
+    </div></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-sk-${a.id}" style="width:${prog}%"></div></div>
+    <div class="ac-btns">${locked?`<button class="btn sm" disabled>🔒 Lv ${a.reqLv}</button>`:`
+      <button class="btn sm ${running&&!isTraining?'stop':'primary'}" onclick="toggleSkAction('${currentSkill}','${a.id}')">${running&&!isTraining?'Stop':'Start'}</button>
+      <button class="btn sm teal ${isTraining?'stop':''}" onclick="trainSkAction('${currentSkill}','${a.id}')">${isTraining?'Stop Train':'Train'}</button>
+      <button class="btn sm" onclick="consumeSkAction('${currentSkill}','${a.id}')">Consume×100</button>`}
+    </div>`;
+    grid.appendChild(d);
+  });
+  renderActiveTasks();
+}
+
+function renderActiveTasks(){
+  const el=document.getElementById('active-list');
+  const all=[...Object.entries(ACTIVE_SK),...Object.entries(ACTIVE_CR)];
+  if(!all.length){el.innerHTML='<span style="color:var(--text3)">None running.</span>';return;}
+  el.innerHTML=all.map(([sk,v])=>{
+    const s=[...SKILLS,...CRAFT_SKILLS].find(x=>x.id===sk);
+    const a=[...Object.values(SKILL_ACTIONS),...Object.values(CRAFT_ACTIONS)].flat().find(x=>x.id===v.action);
+    if(!s||!a)return '';
+    const isCr=!!ACTIVE_CR[sk];
+    const drain=(a.stam*(isCr?0.3:1)).toFixed(1);
+    const modeLabel=v.mode==='train'?' (training)':'';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;margin-bottom:5px">
+      <span>${s.icon} ${a.name}${modeLabel}<br><span style="color:var(--teal3);font-size:10px">⚡ −${drain}/s</span></span>
+      <button class="btn sm" onclick="stopAny('${sk}')">Stop</button></div>`;
+  }).join('');
+}
+
+function toggleSkAction(skId,aId){
+  const sk=SKILLS.find(s=>s.id===skId),a=(SKILL_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_SK[skId]?.action===aId&&ACTIVE_SK[skId]?.mode!=='train'){delete ACTIVE_SK[skId];notify('Stopped '+a.name);}
+  else{ACTIVE_SK[skId]={action:aId,prog:0,timer:0,mode:'normal'};notify('Started '+a.name);}
+  renderSkilling();
+}
+function trainSkAction(skId,aId){
+  const sk=SKILLS.find(s=>s.id===skId),a=(SKILL_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_SK[skId]?.action===aId&&ACTIVE_SK[skId]?.mode==='train'){delete ACTIVE_SK[skId];notify('Stopped training');}
+  else{ACTIVE_SK[skId]={action:aId,prog:0,timer:0,mode:'train'};notify('Training '+a.name+' — XP only, no yield');}
+  renderSkilling();
+}
+function consumeSkAction(skId,aId){
+  const sk=SKILLS.find(s=>s.id===skId),a=(SKILL_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a)return;
+  const r=consumeItems(a.yield,100);
+  if(!r.ok){notify(r.msg);return;}
+  sk.xp+=a.xp*200;sk.mastery[a.id]=(sk.mastery[a.id]||0)+200;
+  sk.groupMastery=Object.values(sk.mastery).reduce((a,b)=>a+b,0);
+  let lvled=false;
+  while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;lvled=true;}
+  feedAdd([{t:'+'+a.xp*200+' '+sk.name+' XP',c:'fc-xp'},...r.feed]);
+  notify(r.msg+' — +'+a.xp*200+' XP'+(lvled?' · Leveled up!':''));
+  updateGold();renderSkilling();
+}
+
+// Consume qty of item: inventory first, buy remainder from market. Returns {ok,msg,feed}
+
+// Per-item capacity. Overflow beyond cap is auto-sold.
+function itemCap(){return G.holdCap+G.capLv*10}
+function addItem(name,qty){
+  const cap=itemCap();
+  const cur=INV[name]||0;
+  let toAdd=qty,sold=0,earned=0;
+  if(cur+toAdd>cap){
+    sold=cur+toAdd-cap;
+    toAdd=Math.max(0,cap-cur);
+    earned=sellPrice(name,sold);
+    gainGold(earned);G.salesDay+=earned;
+    adjustMktPrice(name,-sold*0.01);
+    updateGold();
+  }
+  if(toAdd>0)INV[name]=cur+toAdd;
+  return {sold,earned};
+}
+function upgradeCapacity(){
+  const cost=100*Math.pow(2,G.capLv);
+  if(G.gold<cost){notify('Need '+cost.toLocaleString()+'g to upgrade capacity');return;}
+  G.gold-=cost;G.capLv++;
+  notify('Capacity upgraded — '+itemCap()+' per item. Next: '+(100*Math.pow(2,G.capLv)).toLocaleString()+'g');
+  updateGold();renderInventory();
+}
+
+
+// ═══════════════ PRODUCER INDEX & EFFORT ENGINE ═══════════════
+// Map every producible item -> {skillType:'sk'|'cr', skillId, action}
+let PRODUCER={};
+function buildProducerIndex(){
+  PRODUCER={};
+  Object.entries(SKILL_ACTIONS).forEach(([skId,acts])=>acts.forEach(a=>{
+    if(!PRODUCER[a.yield])PRODUCER[a.yield]={type:'sk',skillId:skId,action:a};
+  }));
+  Object.entries(CRAFT_ACTIONS).forEach(([skId,acts])=>acts.forEach(a=>{
+    if(!PRODUCER[a.yield])PRODUCER[a.yield]={type:'cr',skillId:skId,action:a};
+  }));
+}
+
+// Recursively compute the total effort time (seconds) to make `qty` of `item`,
+// accounting for current inventory. Does NOT mutate state.
+function effortTime(item,qty,invCopy,depth){
+  if(depth>8)return 0; // guard against cycles
+  const have=invCopy[item]||0;
+  const use=Math.min(have,qty);
+  invCopy[item]=have-use;
+  let need=qty-use;
+  if(need<=0)return 0;
+  const p=PRODUCER[item];
+  if(!p)return 0; // raw/unproducible — treat as instant (will be bought)
+  const sk=(p.type==='sk'?SKILLS:CRAFT_SKILLS).find(s=>s.id===p.skillId);
+  const a=p.action;
+  const perUnit=a.qty||1;
+  const runs=Math.ceil(need/perUnit);
+  let t=0;
+  for(let i=0;i<runs;i++){
+    // sub-ingredients first
+    (a.ingredients||[]).forEach(ing=>{t+=effortTime(ing.item,ing.qty,invCopy,depth+1);});
+    t+=effTime(sk,a);
+  }
+  return t;
+}
+
+// Actually MAKE `qty` of `item` through effort: consumes sub-ingredients from inv
+// (recursively crafting them too), awards XP/mastery to each producing skill.
+// Returns {made, feed:[]} . feed entries describe each base production.
+// Ensures INV has at least `qty` of `item`, producing the shortfall through effort.
+// Sub-ingredients are recursively made; each production credits its base skill XP/mastery.
+// Produced items are deposited into INV. Returns the amount of `item` now available (capped at qty).
+function effortMake(item,qty,feed,depth){
+  if(depth>8)return INV[item]||0;
+  const have=INV[item]||0;
+  let need=qty-have;
+  if(need<=0)return qty; // already have enough
+  const p=PRODUCER[item];
+  if(!p)return have; // raw/unproducible — caller handles shortfall (buy)
+  const sk=(p.type==='sk'?SKILLS:CRAFT_SKILLS).find(s=>s.id===p.skillId);
+  const a=p.action;
+  const perUnit=a.qty||1;
+  const runs=Math.ceil(need/perUnit);
+  for(let i=0;i<runs;i++){
+    // ensure sub-ingredients are present (make via effort, buy shortfall)
+    let canRun=true;
+    (a.ingredients||[]).forEach(ing=>{
+      const got=effortMake(ing.item,ing.qty,feed,depth+1);
+      if(got<ing.qty){
+        const short=ing.qty-got;
+        const cost=Math.ceil(mktPrice(ing.item)*short);
+        if(G.gold>=cost){G.gold-=cost;INV[ing.item]=(INV[ing.item]||0)+short;
+          if(isFloored(ing.item))drawFloor(ing.item,short); else adjustMktPrice(ing.item,short*0.02);
+          feed.push({t:'-'+cost+'g ('+short+'x '+ing.item+')',c:'fc-neg'});}
+        else canRun=false;
+      }
+    });
+    if(!canRun)break;
+    // consume the sub-ingredients
+    (a.ingredients||[]).forEach(ing=>{INV[ing.item]=Math.max(0,(INV[ing.item]||0)-ing.qty);});
+    // deposit the produced item and credit the base skill
+    INV[item]=(INV[item]||0)+perUnit;
+    sk.xp+=a.xp;sk.mastery[a.id]=(sk.mastery[a.id]||0)+1;
+    sk.groupMastery=Object.values(sk.mastery).reduce((x,y)=>x+y,0);
+    while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;triggerLvlUp(sk);}
+    feed.push({t:'⚙ +'+perUnit+' '+item+' ('+sk.name+' +'+a.xp+'xp)',c:'fc-dim'});
+  }
+  return Math.min(qty,INV[item]||0);
+}
+
+function consumeItems(item,qty){
+  const have=INV[item]||0;
+  const fromInv=Math.min(have,qty);
+  const toBuy=qty-fromInv;
+  let cost=0;
+  if(toBuy>0){
+    cost=Math.ceil(mktPrice(item)*toBuy);
+    if(G.gold<cost)return {ok:false,msg:'Have '+fromInv+'× '+item+', need '+cost+'g for the other '+toBuy,feed:[]};
+  }
+  if(fromInv>0){INV[item]-=fromInv;if(INV[item]<=0)delete INV[item];}
+  const feed=[];
+  if(fromInv>0)feed.push({t:'-'+fromInv+'× '+item+' (inventory)',c:'fc-neg'});
+  if(toBuy>0){
+    G.gold-=cost;if(isFloored(item))drawFloor(item,toBuy); else adjustMktPrice(item,toBuy*0.02);
+    feed.push({t:'-'+cost+'g (bought '+toBuy+'× '+item+')',c:'fc-neg'});
+  }
+  const msg=toBuy>0
+    ?(fromInv>0?'Consumed '+fromInv+' from inventory + bought '+toBuy+' for '+cost+'g':'Bought & consumed '+qty+'× '+item+' for '+cost+'g')
+    :'Consumed '+qty+'× '+item+' from inventory';
+  return {ok:true,msg,feed};
+}
+function upgradeSkillTool(){
+  const sk=SKILLS.find(s=>s.id===currentSkill);
+  const acts=SKILL_ACTIONS[currentSkill]||[];if(!acts.length)return;
+  const cap=maxToolLv(currentSkill);
+  if(sk.toolLv>=cap){notify('Tool at max Lv '+cap+' — research "'+sk.name+' Toolcraft" to raise the cap');return;}
+  const item=acts[0].yield,cost=100*Math.pow(2,sk.toolLv);
+  if((INV[item]||0)<cost){notify('Need '+cost+'× '+item+' to upgrade');return;}
+  INV[item]-=cost;sk.toolLv++;
+  notify('Tool upgraded to Lv '+sk.toolLv+'/'+cap+' (+10% speed)');renderSkilling();
+}
+function stopAny(sk){delete ACTIVE_SK[sk];delete ACTIVE_CR[sk];renderSkilling();renderCrafting();}
+
+// ═══════════════ CRAFTING ═══════════════
+function setCraftAmt(n,btn){
+  G.craftAmt=n;
+  document.querySelectorAll('#craft-amt-btns button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// heat a craft consumes = explicit a.heat if set, else half the combined input energy (min 1)
+function craftHeatCost(a){
+  if(a.heat)return a.heat;
+  const e=(a.ingredients||[]).reduce((s,i)=>s+itemEnergy(i.item)*i.qty,0);
+  return Math.max(1,Math.ceil(e*0.5));
+}
+// mana a craft consumes (luxury refining). 0 for most recipes.
+function craftManaCost(a){return a.mana||0;}
+
+function renderCrafting(){
+  const tabs=document.getElementById('craft-tabs');tabs.innerHTML='';
+  CRAFT_SKILLS.forEach(s=>{
+    const b=document.createElement('button');b.className='stab'+(s.id===currentCraft?' active':'');
+    b.textContent=s.icon+' '+s.name+' '+s.lv;b.onclick=()=>{currentCraft=s.id;renderCrafting()};
+    tabs.appendChild(b);
+  });
+  const sk=CRAFT_SKILLS.find(s=>s.id===currentCraft);
+  const xpN=lvToXp(sk.lv);
+  document.getElementById('craft-skill-lbl').textContent=sk.name;
+  document.getElementById('craft-lv-lbl').textContent='Lv '+sk.lv;
+  document.getElementById('craft-xpbar').style.width=(sk.xp/xpN*100)+'%';
+  document.getElementById('craft-xplbl').textContent=sk.xp+'/'+xpN;
+  const grid=document.getElementById('craft-grid');grid.innerHTML='';
+  const acts=CRAFT_ACTIONS[currentCraft]||[];
+  if(!acts.length){grid.innerHTML='<div style="color:var(--text3);padding:20px;grid-column:1/-1">No recipes yet for this skill.</div>';return;}
+  acts.forEach(a=>{
+    const locked=sk.lv<a.reqLv,running=ACTIVE_CR[currentCraft]?.action===a.id;
+    const curMode=running?ACTIVE_CR[currentCraft]?.mode:null;
+    const isTraining=curMode==='train';
+    const isEffort=curMode==='effort';
+    const isBuy=curMode==='buy';
+    const prog=running?(ACTIVE_CR[currentCraft].prog*100).toFixed(0):0;
+    const ingr=a.ingredients||[];
+    const batchN=G.craftAmt>0?G.craftAmt:1;const canCraft=ingr.every(i=>(INV[i.item]||0)>=i.qty*batchN);
+    const d=document.createElement('div');d.className='ac'+(locked?' locked':'')+(running?' running':'');
+    const ingrHtml=ingr.map(i=>{const have=INV[i.item]||0,need=Math.ceil(i.qty*(G.craftAmt>0?G.craftAmt:1));
+      return `<span style="color:${have>=need?'var(--teal3)':'#e07070'}">${getIcon(i.item)} ${i.item} ${have}/${need}</span>`;}).join(' ');
+    d.innerHTML=`<div class="ac-head"><div class="ac-icon">${a.icon}</div><div class="ac-meta">
+      <div class="ac-name ${locked?'locked-name':''}">${a.name} <span class="badge lv">Lv ${a.reqLv}</span></div>
+      <div class="ac-stats">→ ${getIcon(a.yield)} ${a.yield}×${a.qty||1} · ${(effTime(sk,a)).toFixed(1)}s · ${Math.floor(a.success*100)}% · 🔥${craftHeatCost(a)}${a.mana?' · ✦'+a.mana:''}</div>
+      <div class="ac-xp" style="color:var(--teal3)">Mastery <span id="mast-cr-${a.id}">${sk.mastery[a.id]||0}</span></div>
+      <div style="font-size:10px;margin-top:2px">${ingrHtml}</div>
+      ${!canCraft&&!locked&&!isTraining?'<div style="font-size:10px;color:#e07070;margin-top:1px">Need more materials</div>':''}
+    </div></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-cr-${a.id}" style="width:${prog}%"></div></div>
+    <div class="ac-btns">${locked?`<button class="btn sm" disabled>🔒 Lv ${a.reqLv}</button>`:`
+      <button class="btn sm ${isEffort?'stop':'primary'}" onclick="toggleCrAction('${currentCraft}','${a.id}')">${isEffort?'Stop':'Craft'}</button>
+      <button class="btn sm ${isBuy?'stop':''}" onclick="buyCrAction('${currentCraft}','${a.id}')">${isBuy?'Stop Buy':'Buy'}</button>
+      <button class="btn sm teal ${isTraining?'stop':''}" onclick="trainCrAction('${currentCraft}','${a.id}')">${isTraining?'Stop Train':'Train'}</button>
+      <button class="btn sm" onclick="consumeCrAction('${currentCraft}','${a.id}')">Consume×100</button>`}
+    </div>`;
+    grid.appendChild(d);
+  });
+  const ca=document.getElementById('craft-active');
+  const run=Object.entries(ACTIVE_CR);
+  ca.innerHTML=run.length?run.map(([sk,v])=>{
+    const s=CRAFT_SKILLS.find(x=>x.id===sk);const a=(CRAFT_ACTIONS[sk]||[]).find(x=>x.id===v.action);
+    return s&&a?`<div style="font-size:11px">${s.icon} ${a.name}${v.mode==='train'?' (training)':''}<div class="prog-bar"><div class="prog-fill" id="tp-cr-${sk}" style="width:${(v.prog*100).toFixed(0)}%"></div></div></div>`:''
+  }).join(''):'<span style="font-size:11px;color:var(--text3)">None.</span>';
+}
+function toggleCrAction(skId,aId){
+  const sk=CRAFT_SKILLS.find(s=>s.id===skId),a=(CRAFT_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_CR[skId]?.action===aId&&ACTIVE_CR[skId]?.mode!=='train'){delete ACTIVE_CR[skId];notify('Stopped crafting '+a.name);}
+  else{ACTIVE_CR[skId]={action:aId,prog:0,timer:0,mode:'effort',remaining:G.craftAmt||999};notify('Crafting '+a.name+' — building base items through effort');}
+  renderCrafting();
+}
+function trainCrAction(skId,aId){
+  const sk=CRAFT_SKILLS.find(s=>s.id===skId),a=(CRAFT_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_CR[skId]?.action===aId&&ACTIVE_CR[skId]?.mode==='train'){delete ACTIVE_CR[skId];notify('Stopped training');}
+  else{ACTIVE_CR[skId]={action:aId,prog:0,timer:0,mode:'train',remaining:999};notify('Training '+a.name+' — 2× XP, no materials needed');}
+  renderCrafting();
+}
+
+function buyCrAction(skId,aId){
+  const sk=CRAFT_SKILLS.find(s=>s.id===skId),a=(CRAFT_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_CR[skId]?.action===aId&&ACTIVE_CR[skId]?.mode==='buy'){delete ACTIVE_CR[skId];notify('Stopped');renderCrafting();return;}
+  ACTIVE_CR[skId]={action:aId,prog:0,timer:0,mode:'buy',remaining:G.craftAmt||999};
+  notify('Crafting '+a.name+' — buying ingredients from market');
+  renderCrafting();
+}
+
+function consumeCrAction(skId,aId){
+  const sk=CRAFT_SKILLS.find(s=>s.id===skId),a=(CRAFT_ACTIONS[skId]||[]).find(x=>x.id===aId);
+  if(!a)return;
+  const r=consumeItems(a.yield,100);
+  if(!r.ok){notify(r.msg);return;}
+  sk.xp+=a.xp*200;sk.mastery[a.id]=(sk.mastery[a.id]||0)+200;
+  sk.groupMastery=Object.values(sk.mastery).reduce((a,b)=>a+b,0);
+  let lvled=false;
+  while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;lvled=true;}
+  feedAdd([{t:'+'+a.xp*200+' '+sk.name+' XP',c:'fc-xp'},...r.feed]);
+  notify(r.msg+' — +'+a.xp*200+' XP'+(lvled?' · Leveled up!':''));
+  updateGold();renderCrafting();
+}
+
+// ═══════════════ INVENTORY ═══════════════
+function renderInventory(){
+  const cap=itemCap();
+  document.getElementById('hold-info').textContent=cap+' per item';
+  const upg=document.getElementById('cap-upg-btn');
+  if(upg)upg.textContent='⬆ +10 capacity ('+(100*Math.pow(2,G.capLv)).toLocaleString()+'g)';
+  const grid=document.getElementById('inv-grid');grid.innerHTML='';
+  const items=Object.entries(INV).filter(([,v])=>v>0);
+  if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;color:var(--text3);text-align:center;padding:30px;font-size:12px">Inventory empty. Go skill something!</div>';return;}
+  items.forEach(([name,qty])=>{
+    const price=MKT[name]?.price||0;
+    const s=document.createElement('div');
+    s.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px;text-align:center;cursor:pointer;transition:border-color 0.15s';
+    s.onmouseover=()=>s.style.borderColor='var(--border3)';
+    s.onmouseout=()=>s.style.borderColor='var(--border)';
+    s.onclick=()=>{document.getElementById('item-detail').innerHTML=`
+      <div style="font-weight:700;margin-bottom:5px">${getIcon(name)} ${name}</div>
+      <div>Qty: <b>${qty}</b></div><div>Price: <b>${price<10?price.toFixed(1):Math.floor(price)}g</b></div>
+      <div style="margin-bottom:8px">Value: <b>${(qty*Math.floor(price)).toLocaleString()}g</b></div>
+      <div style="display:flex;gap:5px">
+        <button class="btn sm primary" onclick="sellItem('${name}',1)">Sell 1</button>
+        <button class="btn sm primary" onclick="sellItem('${name}',${qty})">Sell All</button></div>`;};
+    const atCap=qty>=itemCap();
+    s.innerHTML=`<div style="font-size:20px">${getIcon(name)}</div><div style="font-size:10px;margin-top:2px;color:${atCap?'var(--amber3)':'var(--text2)'};font-weight:${atCap?'700':'400'}">${qty}/${itemCap()}</div><div style="font-size:9px;color:var(--text3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60px;margin:0 auto">${name}</div>`;
+    grid.appendChild(s);
+  });
+}
+function sellItem(name,qty){
+  qty=Math.min(qty,INV[name]||0);if(!qty)return;
+  const earn=sellPrice(name,qty);gainGold(earn);G.salesDay+=earn;
+  INV[name]-=qty;if(INV[name]<=0)delete INV[name];
+  adjustMktPrice(name,-qty*0.02);notify('Sold '+qty+'× '+name+' for '+earn.toLocaleString()+'g');
+  updateGold();renderInventory();
+}
+function sellAll(){
+  let total=0;
+  Object.entries({...INV}).forEach(([name,qty])=>{
+    const earn=sellPrice(name,qty);total+=earn;G.salesDay+=earn;
+    adjustMktPrice(name,-qty*0.02);delete INV[name];
+  });
+  gainGold(total);notify('Sold all for '+total.toLocaleString()+'g (5% tax applied)');
+  updateGold();renderInventory();
+}
+
+// ═══════════════ MARKET ═══════════════
+let MKT_SUB='prices';
+function setMktSub(s){
+  MKT_SUB=s;
+  ['prices','inventory','land','heat','economy','consumption','profits'].forEach(x=>{
+    const b=document.getElementById('msub-'+x);if(b)b.classList.toggle('active',x===s);
+  });
+  renderMarket();
+}
+function fmtPrice(p){return p<10?p.toFixed(1):Math.floor(p).toLocaleString();}
+function renderMarket(){
+  const el=(id)=>document.getElementById(id);
+  if(el('mkt-thief-pen'))el('mkt-thief-pen').textContent='−'+Math.floor(getThiefPenalty()*100)+'%';
+  if(el('mkt-sales'))el('mkt-sales').textContent=G.salesDay.toLocaleString()+'g';
+  if(el('mkt-heat'))el('mkt-heat').textContent=Math.floor(HEAT).toLocaleString();
+  if(el('mkt-pop'))el('mkt-pop').textContent=totalPopulation().toLocaleString();
+  if(el('mkt-consume-t'))el('mkt-consume-t').textContent=Math.ceil(ECONOMY.consumeInterval-ECONOMY.consumeTimer)+'s';
+  const c=document.getElementById('msub-content');if(!c)return;
+  if(MKT_SUB==='prices')renderMktPrices(c);
+  else if(MKT_SUB==='inventory')renderMktInventory(c);
+  else if(MKT_SUB==='land')renderMktLand(c);
+  else if(MKT_SUB==='heat')renderMktHeat(c);
+  else if(MKT_SUB==='economy')renderMktEconomy(c);
+  else if(MKT_SUB==='consumption')renderMktConsumption(c);
+  else if(MKT_SUB==='profits')renderMktProfits(c);
+}
+function renderMktPrices(c){
+  c.innerHTML='<div class="card-title">Market Prices</div><div class="mkt-hdr"><span>Item</span><span>In Bag</span><span>Price</span><span>Trade</span></div><div id="mkt-list"></div>';
+  const list=document.getElementById('mkt-list');
+  Object.entries(MKT).forEach(([name,m])=>{
+    const qty=INV[name]||0,pct=(m.price-m.base)/m.base*100;
+    const d=document.createElement('div');d.className='mkt-row';
+    const safeId=name.replace(/[^a-zA-Z0-9]/g,'_');
+    d.innerHTML=`<span>${getIcon(name)} ${name}</span><span style="color:var(--text2)" id="mq-${safeId}">${qty}</span>
+      <span class="${pct>0?'price-up':'price-dn'}" id="mp-${safeId}">${fmtPrice(m.price)}g ${pct>0?'▲':'▼'}</span>
+      <div style="display:flex;gap:4px">
+        <button class="btn sm" onclick="sellItem('${name}',Math.max(1,INV['${name}']||0))">Sell</button>
+        <button class="btn sm" onclick="buyFromMkt('${name}',1)">Buy</button></div>`;
+    list.appendChild(d);
+  });
+}
+function renderMktHeat(c){
+  const ranked=Object.keys(MKT).map(n=>({n,epg:energyPerGold(n),e:itemEnergy(n),p:MKT[n].price}))
+    .sort((a,b)=>b.epg-a.epg).slice(0,10);
+  c.innerHTML='<div class="card-title">🔥 Cheapest Heat per Gold <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0">— buying these to burn gives the most heat per gold spent</span></div>'+
+    '<div style="display:grid;grid-template-columns:24px 1fr 80px 90px 80px;gap:6px;padding:4px 6px;font-size:10px;color:var(--text3)"><span>#</span><span>Item</span><span>Energy</span><span>Price</span><span>Heat/Gold</span></div>'+
+    ranked.map((r,i)=>`<div style="display:grid;grid-template-columns:24px 1fr 80px 90px 80px;gap:6px;padding:5px 6px;font-size:11px;border-radius:3px;${i%2?'':'background:var(--bg3)'}">
+      <span style="color:var(--text3)">${i+1}</span>
+      <span>${getIcon(r.n)} ${r.n}</span>
+      <span style="color:var(--amber3)">🔥 ${r.e}</span>
+      <span style="color:var(--text2)">${fmtPrice(r.p)}g</span>
+      <span style="color:var(--teal3);font-weight:600">${r.epg.toFixed(2)}</span>
+    </div>`).join('');
+}
+function renderMktEconomy(c){
+  const pop=totalPopulation();
+  const cats=consumableCategories();
+  const perCat=Math.max(1,Math.floor(pop/cats.length));
+  const players=1+THIEF_NPC_COUNT+POLICE.length+(G.myThief?1:0)+(G.myPolice?1:0);
+  c.innerHTML=`<div class="card-title">👥 Economy</div>
+    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:12px">
+      <div>Total population: <b style="color:var(--amber3)">${pop.toLocaleString()}</b></div>
+      <div>NPCs: <b>${ECONOMY.npcPop}</b></div>
+      <div>Players: <b>${players}</b></div>
+      <div>Next consume in: <b style="color:var(--teal3)">${Math.ceil(ECONOMY.consumeInterval-ECONOMY.consumeTimer)}s</b></div>
+    </div>
+    <div style="font-size:10px;color:var(--text2);margin-bottom:8px">Every ${ECONOMY.consumeInterval/60} min the population buys & destroys ~${perCat} units of its target item in each of the ${cats.length} consumable categories — real demand that raises prices. Defence is government-managed and not bought by the population.</div>
+    <div class="card-title" style="margin-top:6px">Consumption Categories</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">`+
+    CATEGORIES.map(cat=>{
+      if(cat==='Defence'){
+        const comp=defenceComponents().sort((a,b)=>MKT[a].price-MKT[b].price);
+        const cheap=comp[0];
+        return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+          <div style="font-weight:700;font-size:12px;margin-bottom:3px">${cat} <span class="badge police" style="font-size:8px">GOV</span></div>
+          <div style="font-size:10px;color:var(--text2)">${comp.length} component types</div>
+          <div style="font-size:10px;color:var(--amber3);margin-top:2px">Government-managed${cheap?' · cheapest '+getIcon(cheap)+' '+cheap:''}</div>
+        </div>`;
+      }
+      const ranked=categoryTargets(cat);
+      const target=ranked[0];
+      const order=cat==='Knowledge'?'most expensive':'cheapest';
+      return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+        <div style="font-weight:700;font-size:12px;margin-bottom:3px">${cat}</div>
+        <div style="font-size:10px;color:var(--text2)">${ranked.length} item types · buys ${order}</div>
+        <div style="font-size:10px;color:var(--teal3);margin-top:2px">Demand: ${perCat}/cycle on ${target?getIcon(target)+' '+target:'—'}</div>
+      </div>`;
+    }).join('')+'</div>'+
+    (ECONOMY.lastConsume.length?`<div class="card-title" style="margin-top:10px">Last Cycle Purchases</div>`+
+      ECONOMY.lastConsume.map(l=>`<div style="font-size:11px;padding:3px 6px;display:flex;justify-content:space-between;border-bottom:1px solid var(--bg3)">
+        <span><b>${l.cat}</b> → ${getIcon(l.item)} ${l.item} ×${l.qty}</span>
+        <span style="color:var(--amber3)">${l.spent.toLocaleString()}g spent</span></div>`).join(''):'');
+}
+function renderMktConsumption(c){
+  c.innerHTML='<div class="card-title">🛒 Population Consumption Targets <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0">— the item bought first in each category is highlighted</span></div>';
+  CATEGORIES.forEach(cat=>{
+    let items,note;
+    if(cat==='Defence'){
+      // government-managed: show the top-10 cheapest defence components (the feedstock)
+      items=defenceComponents().sort((a,b)=>MKT[a].price-MKT[b].price).slice(0,10);
+      note='top 10 cheapest components · government-managed (converted into the Defence stock)';
+    } else if(cat==='Knowledge'){
+      items=categoryTargets('Knowledge').slice(0,10);
+      note='population buys the MOST expensive (prestige)';
+    } else {
+      items=categoryItems(cat).slice(0,10);
+      note='population buys the cheapest';
+    }
+    if(!items.length)return;
+    const sec=document.createElement('div');sec.style.marginBottom='8px';
+    sec.innerHTML=`<div class="thief-section">${cat} <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">— ${note}</span></div>`+
+      `<div style="display:grid;grid-template-columns:24px 1fr 90px;gap:6px;padding:2px 6px;font-size:10px;color:var(--text3)"><span>#</span><span>Item</span><span>Price</span></div>`+
+      items.map((n,i)=>`<div style="display:grid;grid-template-columns:24px 1fr 90px;gap:6px;padding:3px 6px;font-size:11px;border-radius:3px;${i%2?'':'background:var(--bg3)'}">
+        <span style="color:var(--text3)">${i+1}</span>
+        <span>${getIcon(n)} ${n}</span>
+        <span style="color:${i===0&&cat!=='Defence'?'var(--teal3)':'var(--text2)'};font-weight:${i===0&&cat!=='Defence'?'600':'400'}">${fmtPrice(MKT[n].price)}g</span>
+      </div>`).join('');
+    c.appendChild(sec);
+  });
+}
+
+// ── Inventory sub-tab ──
+function renderMktInventory(c){
+  const cap=itemCap();
+  const items=Object.entries(INV).filter(([,v])=>v>0);
+  c.innerHTML=`<div class="card-title">🎒 Inventory <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0">— ${cap} capacity per item type</span>
+    <button class="btn sm primary" onclick="upgradeCapacity()">⬆ +10 cap (${(100*Math.pow(2,G.capLv)).toLocaleString()}g)</button></div>
+    <div style="display:flex;gap:6px;margin-bottom:8px"><button class="btn sm primary" onclick="sellAll()">💰 Sell All</button></div>
+    <div id="mkt-inv-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:5px"></div>`;
+  const grid=document.getElementById('mkt-inv-grid');
+  if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;color:var(--text3);text-align:center;padding:30px;font-size:12px">Inventory empty. Go skill something!</div>';return;}
+  items.forEach(([name,qty])=>{
+    const price=MKT[name]?.price||0;const atCap=qty>=cap;
+    const s=document.createElement('div');
+    s.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:6px;text-align:center;cursor:pointer';
+    s.onclick=()=>{sellItem(name,1);};
+    s.title='Click to sell 1 · '+name+' @ '+fmtPrice(price)+'g';
+    s.innerHTML=`<div style="font-size:20px">${getIcon(name)}</div>
+      <div style="font-size:10px;margin-top:2px;color:${atCap?'var(--amber3)':'var(--text2)'};font-weight:${atCap?'700':'400'}">${qty}/${cap}</div>
+      <div style="font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</div>
+      <div style="font-size:9px;color:var(--teal3)">${fmtPrice(price)}g</div>`;
+    grid.appendChild(s);
+  });
+}
+
+// ── Land sub-tab (auto-recurring buildings) ──
+function renderMktLand(c){
+  c.innerHTML=`<div class="card-title">🌍 Land <span style="font-size:9px;color:var(--text3);text-transform:none;letter-spacing:0">— buildings produce automatically, forever, until you stop them</span></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-size:11px">Plots: <b>${LAND.length}</b></span>
+      <span style="font-size:11px">Buildings: <b>${LAND.reduce((a,p)=>a+p.buildings.length,0)}</b></span>
+      <button class="btn sm primary" onclick="buyPlot();renderMarket()">🌍 Buy Plot (500g)</button>
+      <select class="inp" id="mkt-bld-sel" style="width:170px;font-size:11px">
+        <option value="">-- Add building to plot --</option>
+        ${LAND.map((p,i)=>`<optgroup label="Plot #${i+1}">`+Object.entries(BLDEFS).map(([k,d])=>`<option value="${i}:${k}">#${i+1}: ${d.name} (${d.cost}g)</option>`).join('')+`</optgroup>`).join('')}
+      </select>
+      <button class="btn sm" onclick="mktPlaceBuilding()">Build</button>
+    </div>
+    <div id="mkt-land-list"></div>`;
+  const list=document.getElementById('mkt-land-list');
+  if(!LAND.length){list.innerHTML='<div style="color:var(--text3);text-align:center;padding:30px;font-size:12px">No plots owned yet. Buy a plot to begin!</div>';return;}
+  LAND.forEach((plot,pi)=>{
+    const card=document.createElement('div');card.className='plot-card';
+    card.innerHTML=`<div style="font-weight:700;color:var(--amber3);margin-bottom:5px">Plot #${pi+1}</div>`;
+    if(!plot.buildings.length)card.innerHTML+='<div style="font-size:10px;color:var(--text3)">Empty plot — use the dropdown above to build.</div>';
+    plot.buildings.forEach((b,bi)=>{
+      const def=BLDEFS[b.type];const allYields=Object.keys(MKT);
+      const bRow=document.createElement('div');bRow.className='building-row';
+      bRow.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-weight:600;font-size:12px">${def.name} <span class="badge lv">Lv ${b.lv}</span> <span style="color:var(--teal3);font-size:10px">⟳ auto</span></span>
+        <button class="btn sm" onclick="upgBuilding(${pi},${bi});renderMarket()">Upgrade (${def.upgCost*b.lv}g)</button></div>
+      <div style="display:flex;gap:8px;align-items:center;font-size:10px;margin-bottom:5px;flex-wrap:wrap">
+        <span style="color:var(--text2)">Output:</span>
+        <select class="inp" style="width:130px;font-size:10px" onchange="setBldOutput(${pi},${bi},this.value)">
+          ${allYields.map(y=>`<option value="${y}"${b.output===y?' selected':''}>${y}</option>`).join('')}</select>
+        <span style="color:var(--text2)">Input:</span>
+        <select class="inp" style="width:95px;font-size:10px" onchange="setBldInput(${pi},${bi},this.value)">
+          <option value="raw"${b.inputMode==='raw'?' selected':''}>Raw Effort</option>
+          <option value="market"${b.inputMode==='market'?' selected':''}>Buy Market</option></select>
+        <span style="color:var(--text3)">→ ${getIcon(b.output)} ${b.output} every ${(BLDEFS[b.type].speed/b.lv).toFixed(1)}s</span></div>
+      <div class="prog-bar"><div class="prog-fill" id="mkt-bld-${pi}-${bi}" style="width:${(b.prog||0)*100}%"></div></div>`;
+      card.appendChild(bRow);
+    });
+    list.appendChild(card);
+  });
+}
+function mktPlaceBuilding(){
+  const v=document.getElementById('mkt-bld-sel')?.value;if(!v){notify('Pick a plot + building');return;}
+  const [pi,type]=v.split(':');const def=BLDEFS[type];
+  if(G.gold<def.cost){notify('Need '+def.cost+'g');return;}
+  G.gold-=def.cost;LAND[+pi].buildings.push({type,lv:1,output:def.output,inputMode:'raw',prog:0,timer:0});
+  notify(def.name+' built — producing automatically');updateGold();renderMarket();
+}
+
+// ── Profits sub-tab ──
+function renderMktProfits(c){
+  const all=[];
+  SKILLS.filter(s=>s.id!=='thieving').forEach(sk=>{(SKILL_ACTIONS[sk.id]||[]).forEach(a=>{if(sk.lv>=a.reqLv)all.push({name:sk.icon+' '+a.name,xph:xphCalc(sk,a),gph:gphCalc(sk,a),sph:sphCalc(sk,a)});});});
+  CRAFT_SKILLS.forEach(sk=>{(CRAFT_ACTIONS[sk.id]||[]).forEach(a=>{if(sk.lv>=a.reqLv)all.push({name:sk.icon+' '+a.name,xph:xphCalc(sk,a),gph:gphCalc(sk,a),sph:sphCalc(sk,a)});});});
+  all.sort((a,b)=>b[G.profSort]-a[G.profSort]);
+  c.innerHTML=`<div class="card-title">📈 Most Profitable Actions
+    <span style="display:flex;gap:4px">
+      <button class="btn sm ${G.profSort==='xph'?'primary':''}" onclick="G.profSort='xph';renderMarket()">XP/hr</button>
+      <button class="btn sm ${G.profSort==='gph'?'primary':''}" onclick="G.profSort='gph';renderMarket()">Gold/hr</button>
+      <button class="btn sm ${G.profSort==='sph'?'primary':''}" onclick="G.profSort='sph';renderMarket()">Stam/hr</button>
+    </span></div>
+    <div style="display:grid;grid-template-columns:1fr 80px 80px 90px;gap:6px;padding:3px 6px;font-size:10px;color:var(--text3)"><span>Action</span><span>XP/hr</span><span>Gold/hr</span><span>Stam/hr</span></div>`+
+    all.slice(0,25).map((r,i)=>`<div style="display:grid;grid-template-columns:1fr 80px 80px 90px;gap:6px;padding:4px 6px;border-radius:3px;font-size:11px;${i%2?'':'background:var(--bg3)'}">
+      <span><span style="color:var(--text3)">${i+1}.</span> ${r.name}</span>
+      <span style="color:var(--teal3)">${r.xph.toLocaleString()}</span>
+      <span style="color:var(--amber3)">${r.gph.toLocaleString()}</span>
+      <span style="color:var(--text2)">${r.sph.toLocaleString()}</span></div>`).join('');
+}
+
+function buyHeatManual(){
+  const before=G.gold;
+  const g=buyHeat(100);
+  notify('Bought '+g+' heat for '+(before-Math.floor(G.gold))+'g');
+  updateGold();renderMarket();
+}
+function buyFromMkt(name,qty){
+  const cost=Math.ceil(mktPrice(name)*qty);
+  if(G.gold<cost){notify('Need '+cost+'g');return;}
+  G.gold-=cost;INV[name]=(INV[name]||0)+qty;
+  if(isFloored(name))drawFloor(name,qty); else adjustMktPrice(name,qty*0.02);
+  notify('Bought '+qty+'× '+name);updateGold();
+}
+
+// ═══════════════ LAND ═══════════════
+function buyPlot(){
+  if(G.gold<500){notify('Need 500g for a plot');return;}
+  G.gold-=500;LAND.push({id:LAND.length,buildings:[]});
+  notify('Plot purchased!');updateGold();renderLand();
+}
+function renderLand(){
+  document.getElementById('plot-count').textContent=LAND.length;
+  document.getElementById('bld-count').textContent=LAND.reduce((a,p)=>a+p.buildings.length,0);
+  const list=document.getElementById('land-list');
+  if(!LAND.length){list.innerHTML='<div style="color:var(--text3);text-align:center;padding:30px;font-size:12px">No plots owned yet. Buy a plot to begin!</div>';return;}
+  list.innerHTML='';
+  LAND.forEach((plot,pi)=>{
+    const card=document.createElement('div');card.className='plot-card';
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+      <span style="font-weight:700;color:var(--amber3)">Plot #${pi+1}</span>
+      <button class="btn sm primary" onclick="selectPlot(${pi})">+ Build</button></div>`;
+    if(!plot.buildings.length){card.innerHTML+='<div style="font-size:10px;color:var(--text3)">Empty plot.</div>';}
+    else{
+      plot.buildings.forEach((b,bi)=>{
+        const def=BLDEFS[b.type];
+        const bRow=document.createElement('div');bRow.className='building-row';
+        const allYields=Object.keys(MKT);
+        bRow.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-weight:600;font-size:12px">${def.name} <span class="badge lv">Lv ${b.lv}</span></span>
+          <button class="btn sm" onclick="upgBuilding(${pi},${bi})">Upgrade (${def.upgCost*b.lv}g)</button></div>
+        <div style="display:flex;gap:8px;align-items:center;font-size:10px;margin-bottom:5px">
+          <span style="color:var(--text2)">Output:</span>
+          <select class="inp" style="width:120px;font-size:10px" onchange="setBldOutput(${pi},${bi},this.value)">
+            ${allYields.map(y=>`<option value="${y}"${b.output===y?' selected':''}>${y}</option>`).join('')}</select>
+          <span style="color:var(--text2)">Input:</span>
+          <select class="inp" style="width:95px;font-size:10px" onchange="setBldInput(${pi},${bi},this.value)">
+            <option value="raw"${b.inputMode==='raw'?' selected':''}>Raw Effort</option>
+            <option value="market"${b.inputMode==='market'?' selected':''}>Buy Market</option></select></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${(b.prog||0)*100}%"></div></div>`;
+        card.appendChild(bRow);
+      });
+    }
+    list.appendChild(card);
+  });
+  if(selectedPlot!==null){
+    document.getElementById('build-select-card').style.display='block';
+    document.getElementById('plot-sel-lbl').textContent='#'+(selectedPlot+1);
+  }
+}
+function selectPlot(i){selectedPlot=i;renderLand();}
+function setBldOutput(pi,bi,v){LAND[pi].buildings[bi].output=v;}
+function setBldInput(pi,bi,v){LAND[pi].buildings[bi].inputMode=v;}
+function placeBuilding(){
+  const type=document.getElementById('bld-type-sel').value;if(!type){notify('Choose a building type');return;}
+  const def=BLDEFS[type];if(G.gold<def.cost){notify('Need '+def.cost+'g');return;}
+  if(selectedPlot===null){notify('Select a plot first');return;}
+  G.gold-=def.cost;LAND[selectedPlot].buildings.push({type,lv:1,output:def.output,inputMode:'raw',prog:0,timer:0});
+  notify(def.name+' built!');updateGold();renderLand();
+}
+function upgBuilding(pi,bi){
+  const b=LAND[pi].buildings[bi],def=BLDEFS[b.type],cost=def.upgCost*b.lv;
+  if(G.gold<cost){notify('Need '+cost+'g');return;}
+  G.gold-=cost;b.lv++;notify('Building upgraded to Lv '+b.lv);updateGold();renderLand();
+}
+
+// ═══════════════ THIEVING ═══════════════
+function renderThieving(){
+  // keep police sub-tab hidden unless selected
+  const tp=document.getElementById('thv-sub-police'),tt=document.getElementById('thv-sub-thieving');
+  if(tp&&tt){tp.style.display=THV_SUB==='police'?'':'none';tt.style.display=THV_SUB==='police'?'none':'';}
+  const sk=SKILLS.find(s=>s.id==='thieving');
+  const xpN=lvToXp(sk.lv);
+  document.getElementById('thv-lv-badge').textContent='Lv '+sk.lv;
+  document.getElementById('thv-xpbar').style.width=(sk.xp/xpN*100)+'%';
+  document.getElementById('thv-xplbl').textContent=sk.xp+'/'+xpN;
+  const tc=THIEF_NPC_COUNT+(G.myThief?1:0);
+  const pc=POLICE.filter(p=>p.role==='police'||p.role==='vigilant').length;
+  const catchC=pc>0?Math.min(0.9,pc/(tc+pc)*0.6):0;
+  const myBonus=Math.max(0,60-tc*8);
+  document.getElementById('thv-count').textContent=tc;
+  document.getElementById('thv-mpen').textContent='−'+Math.floor(getThiefPenalty()*100)+'%';
+  document.getElementById('thv-mybonus').textContent='+'+myBonus+'%';
+  document.getElementById('thv-catch').textContent=Math.floor(catchC*100)+'%';
+  document.getElementById('thv-my-status').textContent=G.myThief?(THV_LYING_LOW?'⏳ Lying low... ('+Math.ceil(THV_LL_TIMER)+'s)':'Active thief.'):'Not in the guild.';
+  document.getElementById('thv-join').style.display=G.myThief?'none':'block';
+  document.getElementById('thv-leave').style.display=G.myThief?'block':'none';
+  const ztabs=document.getElementById('zone-tabs');ztabs.innerHTML='';
+  ZONES.forEach(z=>{
+    const b=document.createElement('button');b.className='ztab'+(z.id===THV_ZONE?' active':'');
+    b.textContent=z.name;b.onclick=()=>{THV_ZONE=z.id;renderThieving()};ztabs.appendChild(b);
+  });
+  const acts=document.getElementById('thv-actions');acts.innerHTML='';
+  const zActs=THV_ACTIONS[THV_ZONE]||{picks:[],heists:[]};
+  if(zActs.picks?.length){
+    const h=document.createElement('div');h.innerHTML='<div class="thief-section">Pickpockets <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">lift coin from a person – fast, low risk</span></div>';
+    zActs.picks.forEach(a=>h.appendChild(buildThvCard(a,sk)));acts.appendChild(h);
+  }
+  if(zActs.heists?.length){
+    const h=document.createElement('div');h.innerHTML='<div class="thief-section" style="margin-top:10px">Heists <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">crack a stall, vault or keep – slow, fat purse, longer lying low if caught</span></div>';
+    zActs.heists.forEach(a=>h.appendChild(buildThvCard(a,sk,true)));acts.appendChild(h);
+  }
+}
+function buildThvCard(a,sk,isHeist){
+  const locked=sk.lv<a.reqLv,running=ACTIVE_THV===a.id;
+  const lyingLow=running&&THV_LYING_LOW;
+  const prog=running?(ACTIVE_THV_TIMER/a.time*100).toFixed(0):0;
+  const d=document.createElement('div');d.className='heist-ac'+(running?' running':'')+(locked?' locked':'');
+  d.innerHTML=`<div style="font-size:22px">${a.icon}</div>
+    <div><div style="font-weight:700;font-size:12px;margin-bottom:2px">${a.name} <span class="badge lv">Lv ${a.reqLv}</span></div>
+    <div style="font-size:11px">🪙 <span style="color:var(--amber3)">${a.reward[0]}–${a.reward[1]}g</span> &nbsp; <span style="color:${a.success>=0.85?'var(--teal3)':a.success>=0.7?'var(--amber3)':'#e07070'}">${Math.floor(a.success*100)}%</span> &nbsp; <span style="color:var(--text2)">${a.time}s</span></div>
+    ${running?`<div class="prog-bar" style="margin-top:4px"><div class="prog-fill" id="thv-prog-${a.id}" style="width:${prog}%"></div></div>`:''}
+    </div>
+    <button class="btn sm ${!G.myThief||locked?'':'primary'}" onclick="doThv('${a.id}')">${!G.myThief?'Join First':locked?'Lv '+a.reqLv:lyingLow?'Lying low...':running?'Running...':isHeist?'Attempt':'Pickpocket'}</button>`;
+  return d;
+}
+function joinThieves(){if(G.myPolice){notify('Leave police force first');return;}G.myThief=true;notify('Joined Thieves Guild');renderThieving();}
+function leaveThieves(){G.myThief=false;ACTIVE_THV=null;notify('Left the guild');renderThieving();}
+function doThv(aId){
+  if(!G.myThief||THV_LYING_LOW){return;}
+  const allActs=Object.values(THV_ACTIONS).flatMap(z=>[...(z.picks||[]),...(z.heists||[])]);
+  const a=allActs.find(x=>x.id===aId);
+  const sk=SKILLS.find(s=>s.id==='thieving');
+  if(!a||sk.lv<a.reqLv)return;
+  if(ACTIVE_THV===aId){ACTIVE_THV=null;ACTIVE_THV_TIMER=0;renderThieving();return;}
+  ACTIVE_THV=aId;ACTIVE_THV_TIMER=0;notify('Attempting: '+a.name+'...');renderThieving();
+}
+
+// ═══════════════ POLICE ═══════════════
+function renderPolice(){
+  const myP=G.myPolice?[{name:'You',role:G.myPolice}]:[];
+  const all=[...POLICE,...myP];
+  const total=all.length,corrupt=all.filter(p=>p.role==='corrupt').length,vigil=all.filter(p=>p.role==='vigilant').length;
+  document.getElementById('pol-total').textContent=total;
+  document.getElementById('pol-honest').textContent=total-corrupt;
+  document.getElementById('pol-corrupt').textContent=corrupt;
+  document.getElementById('pol-vigil').textContent=vigil;
+  document.getElementById('pol-fund-lbl').textContent=G.policeFunded?'Active':'None';
+  document.getElementById('pol-my-status').textContent=G.myPolice?'You are a '+G.myPolice+'.':'Not on force.';
+  document.getElementById('pol-join-btns').style.display=G.myPolice?'none':'block';
+  const list=document.getElementById('pol-list');list.innerHTML='';
+  all.forEach(p=>{
+    const d=document.createElement('div');d.className='pol-row';
+    d.innerHTML=`<span style="font-size:18px">${p.role==='corrupt'?'🦹':p.role==='vigilant'?'⚖':'🛡'}</span>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600">${p.name}</div>
+      <div style="font-size:10px;color:var(--text2)">${p.role==='corrupt'?'Earns thief bonuses — does not reduce crime':p.role==='vigilant'?'Can expose corrupt officers':'Reduces thief success rate'}</div></div>
+      <span class="badge ${p.role}">${p.role}</span>`;
+    list.appendChild(d);
+  });
+}
+function fundPolice(){
+  if(GOV.treasury>=100){GOV.treasury-=100;G.policeFunded=true;notify('Police funded from treasury (100g)');}
+  else if(G.gold>=100){G.gold-=100;G.policeFunded=true;notify('Treasury empty — funded from your pocket (100g)');updateGold();}
+  else{notify('Need 100g (treasury empty)');return;}
+  renderPolice();
+}
+function joinPolice(role){
+  if(G.myThief){notify('Leave thieves guild first');return;}
+  G.myPolice=role;notify('Joined police as '+role);renderPolice();
+}
+
+// ═══════════════ STANDING STONES ═══════════════
+
+// ── Thieving / Police sub-tabs ──
+let THV_SUB='thieving';
+function setThvSub(s){
+  THV_SUB=s;
+  document.getElementById('tsub-thieving').classList.toggle('active',s==='thieving');
+  document.getElementById('tsub-police').classList.toggle('active',s==='police');
+  document.getElementById('thv-sub-thieving').style.display=s==='thieving'?'':'none';
+  document.getElementById('thv-sub-police').style.display=s==='police'?'':'none';
+  if(s==='police')renderPolice();else renderThieving();
+}
+
+// ── Standing Stones overlay ──
+function openStones(){document.getElementById('stones-ov').style.display='flex';renderStones();}
+function closeStones(){document.getElementById('stones-ov').style.display='none';}
+
+function renderStones(){
+  const sgLv=SKILLS.find(s=>s.id==='stargazing').lv;
+  document.getElementById('stone-sg-lv').textContent=sgLv;
+  const attuned=STONES.find(s=>s.id===G.attunedStone);
+  document.getElementById('stone-attuned').textContent=attuned?attuned.name:'None';
+  if(attuned){const boon=attuned.boonBase+(sgLv/10)*attuned.boonPerLv;document.getElementById('stone-boon-val').textContent='+'+Math.floor(boon*100)+'% '+attuned.boonKey;}
+  else document.getElementById('stone-boon-val').textContent='—';
+  const list=document.getElementById('stones-list');list.innerHTML='';
+  STONES.forEach(s=>{
+    const isAttuned=G.attunedStone===s.id;
+    const boon=s.boonBase+(sgLv/10)*s.boonPerLv;
+    const d=document.createElement('div');d.className='stone-card'+(isAttuned?' attuned':'');
+    d.innerHTML=`<div class="stone-icon">${s.icon}</div>
+      <div style="flex:1">
+        <div class="stone-name">${s.name} ${isAttuned?'<span style="color:var(--amber3);font-size:10px">✓ Active</span>':''}</div>
+        <div class="stone-desc">${s.desc}</div>
+        <div class="stone-boon">Boon: +${Math.floor(boon*100)}% ${s.boonKey} now · +${Math.floor(s.boonPerLv*100)}% per 10 Stargazing levels · up to +${Math.floor(s.boonMax*100)}% at Lv 130</div>
+        <div style="margin-top:7px;display:flex;gap:6px">
+          ${isAttuned?`<button class="btn sm primary">✓ Attuned</button><button class="btn sm danger" onclick="releaseStone()">Release</button>`:
+          `<button class="btn sm primary" onclick="attuneStone('${s.id}')">Attune</button>`}</div>
+      </div>
+      <div style="color:var(--teal3);font-size:12px;font-weight:700;min-width:120px;text-align:right">+${Math.floor(boon*100)}%<br><span style="font-size:10px;color:var(--text2)">${s.boonKey}</span></div>`;
+    list.appendChild(d);
+  });
+}
+function attuneStone(id){G.attunedStone=id;notify('Attuned to '+STONES.find(s=>s.id===id).name);renderStones();}
+function releaseStone(){G.attunedStone=null;notify('Stone released');renderStones();}
+
+// ═══════════════ RESEARCH ═══════════════
+function effectSummary(r,lv){
+  if(r.effect==='toolMax')return 'max tool Lv '+(BASE_TOOL_MAX+lv);
+  if(r.effect==='stat')return '+'+lv+' '+r.target;
+  if(r.effect==='failType')return '−'+lv+'% '+r.target+' failure';
+  return 'Lv '+lv;
+}
+function updateResSidebar(done,lots,fail,isStudy){
+  const el=id=>document.getElementById(id);
+  if(el('res-prog-lbl'))el('res-prog-lbl').textContent=done+'/'+lots;
+  if(el('res-fail'))el('res-fail').textContent=isStudy?'study (safe)':Math.floor(fail*100)+'%';
+  if(el('res-prog-bar'))el('res-prog-bar').style.width=(done/lots*100)+'%';
+}
+function renderResearch(){
+  const el=id=>document.getElementById(id);
+  // mastery summary
+  const myHigh=Math.max(0,...RESEARCH.map(r=>resLevel(r.id)));
+  const myHighRes=myHigh>0?RESEARCH.find(r=>resLevel(r.id)===myHigh):null;
+  const globalHigh=Math.max(0,...RESEARCH.map(r=>RES_STATE[r.id].globalLv));
+  if(el('res-myhigh'))el('res-myhigh').textContent=myHigh+(myHighRes?' · '+myHighRes.name:'');
+  if(el('res-globalhigh'))el('res-globalhigh').textContent=globalHigh;
+  if(el('res-baublehigh'))el('res-baublehigh').textContent=RES_GLOBAL.baubleMax+'★';
+  // active task
+  if(G.resActive){const r=RESEARCH.find(x=>x.id===G.resActive);if(el('res-active'))el('res-active').textContent=(G.resKind==='study'?'📿 Study: ':'🔬 ')+r.name;}
+  else{if(el('res-active'))el('res-active').textContent='None';if(el('res-prog-lbl'))el('res-prog-lbl').textContent='—';if(el('res-fail'))el('res-fail').textContent='—';if(el('res-prog-bar'))el('res-prog-bar').style.width='0%';}
+  if(el('res-cancel'))el('res-cancel').style.display=G.resActive?'block':'none';
+  // your studied baubles
+  const mine=[];
+  RESEARCH.forEach(r=>RES_STATE[r.id].baubles.forEach((b,i)=>{if(b.owner==='You')mine.push(r.name+' #'+(i+1)+' ('+b.studies+'★)');}));
+  if(el('res-my-baubles'))el('res-my-baubles').innerHTML=mine.length?mine.map(m=>'<div style="padding:2px 0;color:var(--teal3)">📿 '+m+'</div>').join(''):'None — Study a bauble to earn a share of all research gold.';
+  // research list grouped by type
+  const list=el('res-list');if(!list)return;list.innerHTML='';
+  [...new Set(RESEARCH.map(r=>r.type))].forEach(type=>{
+    const hdr=document.createElement('div');hdr.className='thief-section';hdr.style.marginTop='10px';
+    hdr.innerHTML=type+' <span style="font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">— fail −'+typeFailReduction(type)+'% from methodology</span>';
+    list.appendChild(hdr);
+    RESEARCH.filter(r=>r.type===type).forEach(r=>list.appendChild(buildResCard(r)));
+  });
+}
+function buildResCard(r){
+  const st=RES_STATE[r.id],lv=resLevel(r.id);
+  const qty=resQty(r,lv),goldC=resGoldCost(r,lv),lots=resLots(r,lv),fail=resFail(r,lv);
+  const studyQty=Math.max(1,Math.ceil(qty/10)),studyGold=Math.ceil(studyQty*catUnitPrice(r.cat));
+  const baubleHtml=st.baubles.map((b,i)=>{
+    const me=b.owner==='You',next=i===st.studyPtr;
+    const col=me?'var(--teal3)':b.owner?'var(--amber3)':'var(--text3)';
+    const tag=me?'You':b.owner?b.owner.split(' ').pop().slice(0,3):'·';
+    return `<span title="${b.owner||'unstudied'} · ${b.studies}★${next?' · next to study':''}" style="display:inline-block;min-width:18px;text-align:center;padding:1px 5px;border-radius:3px;font-size:9px;border:1px solid ${next?'var(--amber2)':'var(--border2)'};color:${col}">${tag}${b.studies?' '+b.studies+'★':''}</span>`;
+  }).join(' ');
+  const d=document.createElement('div');d.className='res-card';
+  const pool=Math.floor(FAIL_POOL[r.id]||0);
+  const orig=st.originator?(st.originator==='You'?'You':st.originator):'—';
+  d.innerHTML=`<div class="res-title">${r.name} <span class="badge lv">Lv ${lv}</span> <span class="badge" style="background:var(--bg4);color:var(--text2)">global ${st.globalLv}</span></div>
+    <div class="res-desc">${r.desc} · currently <b style="color:var(--teal3)">${effectSummary(r,lv)}</b></div>
+    <div style="font-size:10px;color:var(--text2);margin-bottom:5px">Next: <b>${qty.toLocaleString()}× ${r.cat}</b> ≈ <b style="color:var(--amber3)">${goldC.toLocaleString()}g</b> · <b>${lots.toLocaleString()} lots</b> · fail/lot <b style="color:#e07070">${Math.floor(fail*100)}%</b> · insurance <b style="color:var(--teal3)">${pool}%</b></div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:6px">Originator: <b>${orig}</b> · Baubles: ${baubleHtml}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <button class="btn sm primary" ${G.resActive?'disabled':''} onclick="startResearch('${r.id}')">🔬 Research → Lv ${lv+1}</button>
+      <button class="btn sm" ${G.resActive?'disabled':''} onclick="buyResearch('${r.id}')">💰 Buy (${goldC.toLocaleString()}g)</button>
+      <button class="btn sm teal" ${G.resActive?'disabled':''} onclick="studyResearch('${r.id}')">📿 Study #${st.studyPtr+1} (≈${studyGold.toLocaleString()}g)</button>
+    </div>`;
+  return d;
+}
+function buyResearch(id){
+  if(G.resActive){notify('Finish your current research/study first');return;}
+  const r=RESEARCH.find(x=>x.id===id);if(!r)return;
+  const lv=resLevel(id),qty=resQty(r,lv),goldCost=resGoldCost(r,lv);
+  if(G.gold<goldCost){notify('Buy needs ≈'+goldCost.toLocaleString()+'g of '+r.cat);return;}
+  const spent=consumeCategory(r.cat,qty);
+  const st=RES_STATE[id];
+  const tithe=Math.floor(spent*0.10); // 10% of cost to the original researcher
+  let msg='';
+  if(st.originator&&st.originator!=='You'){msg=' · 10% ('+tithe.toLocaleString()+'g) → '+st.originator;}
+  else if(st.originator==='You'){G.gold+=tithe;msg=' · you keep the 10% tithe';}
+  const back=payStudyPool(id,spent); // buying still feeds the study pool
+  MY_RES[id]=(MY_RES[id]||0)+1;st.globalLv=Math.max(st.globalLv,MY_RES[id]);
+  if(!st.originator)st.originator='You';
+  notify('💰 Bought '+r.name+' → Lv '+MY_RES[id]+msg+(back>0?' · study pool '+back.toLocaleString()+'g':''),4000);
+  updateGold();renderResearch();renderSkilling();
+}
+function startResearch(id){
+  if(G.resActive){notify('Finish your current research/study first');return;}
+  const r=RESEARCH.find(x=>x.id===id);if(!r)return;
+  const lv=resLevel(id),qty=resQty(r,lv),goldCost=resGoldCost(r,lv);
+  if(G.gold<goldCost){notify('Need ≈'+goldCost.toLocaleString()+'g of '+r.cat+' ('+qty.toLocaleString()+' units)');return;}
+  const spent=consumeCategory(r.cat,qty);
+  const back=payStudyPool(id,spent); // studiers (incl. you) get 50% of the spend
+  G.resActive=id;G.resKind='research';G.resProg=0;
+  const lots=resLots(r,lv),fail=resFail(r,lv);
+  notify('🔬 Researching '+r.name+' Lv '+(lv+1)+(back>0?' · study pool returned '+back.toLocaleString()+'g':''));
+  let done=0;updateResSidebar(0,lots,fail,false);renderResearch();updateGold();
+  G._resIv=setInterval(()=>{
+    done++;G.resProg=done/lots;
+    // failure pool offsets this lot's failure first (e.g. 12% pool vs 9% lot → lot1 -9% (pool→3), lot2 -3%)
+    const effFail=applyFailPool(id,fail);
+    updateResSidebar(done,lots,effFail,false);
+    if(Math.random()<effFail){clearInterval(G._resIv);G.resActive=null;
+      FAIL_POOL[id]=(FAIL_POOL[id]||0)+1; // every failure adds 1% to this research's insurance pool
+      notify('Research failed at lot '+done+'/'+lots+' — +1% insurance pool ('+(FAIL_POOL[id])+'% now)',3500);renderResearch();return;}
+    if(done>=lots){clearInterval(G._resIv);
+      MY_RES[id]=(MY_RES[id]||0)+1;const st=RES_STATE[id];st.globalLv=Math.max(st.globalLv,MY_RES[id]);
+      if(!st.originator)st.originator='You';
+      G.resActive=null;notify('✅ '+r.name+' → Lv '+MY_RES[id]+'! ('+effectSummary(r,MY_RES[id])+')',4000);
+      renderResearch();renderSkilling();
+    }
+  },1000);
+}
+function studyResearch(id){
+  if(G.resActive){notify('Finish your current research/study first');return;}
+  const r=RESEARCH.find(x=>x.id===id);if(!r)return;
+  const lv=resLevel(id),qty=Math.max(1,Math.ceil(resQty(r,lv)/10)),goldCost=Math.ceil(qty*catUnitPrice(r.cat));
+  if(G.gold<goldCost){notify('Study needs ≈'+goldCost.toLocaleString()+'g of '+r.cat);return;}
+  consumeCategory(r.cat,qty);
+  const st=RES_STATE[id],idx=st.studyPtr,lots=r.baseLots; // same time as the full BASE research
+  G.resActive=id;G.resKind='study';G.resProg=0;
+  notify('📿 Studying '+r.name+' — bauble #'+(idx+1));
+  let done=0;updateResSidebar(0,lots,0,true);renderResearch();updateGold();
+  G._resIv=setInterval(()=>{
+    done++;G.resProg=done/lots;updateResSidebar(done,lots,0,true);
+    if(done>=lots){clearInterval(G._resIv);G.resActive=null;
+      completeStudy(id,idx,'You');
+      notify('📿 Studied '+r.name+' bauble #'+(idx+1)+' — failure −1%, now earning royalties',3500);
+      renderResearch();
+    }
+  },1000);
+}
+function cancelResearch(){if(G._resIv)clearInterval(G._resIv);G.resActive=null;G.resProg=0;notify('Cancelled — materials are not refunded');renderResearch();}
+
+// ═══════════════ COMBAT ═══════════════
+function renderCombat(){
+  const zDiv=document.getElementById('cbt-zones');zDiv.innerHTML='';
+  CBT_ZONES.forEach(z=>{
+    const b=document.createElement('button');b.className='ztab'+(z.id===currentCbtZone?' active':'');
+    b.style.cssText='width:100%;margin-bottom:4px;text-align:left';b.textContent=z.name;
+    b.onclick=()=>{if(G.cbtFighting){notify('Finish current fight first');return;}currentCbtZone=z.id;renderCombat()};
+    zDiv.appendChild(b);
+  });
+  const zone=CBT_ZONES.find(z=>z.id===currentCbtZone);
+  const drops=[...new Set(zone.enemies.flatMap(e=>e.drops))];
+  document.getElementById('cbt-drops').innerHTML=drops.map(d=>getIcon(d)+' '+d).join('<br>');
+}
+function logCombat(msg,cls=''){
+  const log=document.getElementById('cbt-log');
+  const line=document.createElement('div');line.className=cls;line.textContent=msg;
+  log.appendChild(line);if(log.children.length>30)log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+}
+function startFight(){
+  if(G.cbtFighting)return;
+  const zone=CBT_ZONES.find(z=>z.id===currentCbtZone);
+  cbtEnemy={...zone.enemies[Math.floor(Math.random()*zone.enemies.length)]};
+  cbtEnemy.curHp=cbtEnemy.hp;G.cbtFighting=true;
+  document.getElementById('e-sprite').textContent=cbtEnemy.sprite;
+  document.getElementById('e-name').textContent=cbtEnemy.name.toUpperCase();
+  document.getElementById('cbt-fight-btn').style.display='none';
+  document.getElementById('cbt-flee-btn').style.display='inline-block';
+  document.getElementById('cbt-status').textContent='Fighting '+cbtEnemy.name+'...';
+  updateCombatUI();logCombat('⚔ Battle vs '+cbtEnemy.name+' ('+cbtEnemy.hp+'hp)');
+  cbtFightInterval=setInterval(cbtTick,700);
+}
+function cbtTick(){
+  if(!G.cbtFighting||!cbtEnemy)return;
+  const isCrit=Math.random()<0.08;
+  let dmgToEnemy=Math.max(1,20+Math.floor(Math.random()*10)-Math.floor(cbtEnemy.def*0.4))*(isCrit?2:1);
+  let dmgToPlayer=Math.max(1,cbtEnemy.atk-15+Math.floor(Math.random()*8));
+  cbtEnemy.curHp=Math.max(0,cbtEnemy.curHp-dmgToEnemy);G.hp=Math.max(0,G.hp-dmgToPlayer);
+  if(isCrit)logCombat('💥 CRIT! You deal '+dmgToEnemy+' · '+cbtEnemy.name+' hits '+dmgToPlayer,'crit');
+  else logCombat('You hit '+dmgToEnemy+' · '+cbtEnemy.name+' hits '+dmgToPlayer,'hit');
+  updateCombatUI();
+  if(cbtEnemy.curHp<=0){victory();return;}
+  if(G.hp<=0){defeat();return;}
+}
+function victory(){
+  clearInterval(cbtFightInterval);G.cbtFighting=false;
+  const goldBonus=getStoneBonus('combatGold');
+  const earn=Math.floor((cbtEnemy.gold[0]+Math.floor(Math.random()*(cbtEnemy.gold[1]-cbtEnemy.gold[0])))*goldBonus);
+  gainGold(earn);
+  const drop=Math.random()<0.45?cbtEnemy.drops[Math.floor(Math.random()*cbtEnemy.drops.length)]:null;
+  if(drop)addItem(drop,1);
+  logCombat('🏆 VICTORY! +'+earn+'g'+(drop?' · Drop: '+drop:''),'heal');
+  const flash=document.getElementById('combat-flash');
+  flash.innerHTML='<div class="victory-text">VICTORY</div><div style="font-size:14px;color:var(--amber3)">+'+earn+'g'+(drop?' · '+drop:'')+'</div>';
+  flash.style.opacity='1';setTimeout(()=>flash.style.opacity='0',2000);
+  document.getElementById('cbt-fight-btn').style.display='inline-block';
+  document.getElementById('cbt-flee-btn').style.display='none';
+  document.getElementById('cbt-status').textContent='Victory!'+(drop?' Got: '+drop:'');
+  if(G.cbtAuto)setTimeout(startFight,1200);
+  updateGold();updateCombatUI();
+}
+function defeat(){
+  clearInterval(cbtFightInterval);G.cbtFighting=false;
+  logCombat('💀 Defeated! You limp away.','miss');G.hp=Math.max(1,G.hpMax*0.1);
+  document.getElementById('cbt-fight-btn').style.display='inline-block';
+  document.getElementById('cbt-flee-btn').style.display='none';
+  document.getElementById('cbt-status').textContent='Defeated. Rest up.';updateCombatUI();
+}
+function fleeFight(){
+  clearInterval(cbtFightInterval);G.cbtFighting=false;
+  logCombat('🏃 Fled the battle.','miss');
+  document.getElementById('cbt-fight-btn').style.display='inline-block';
+  document.getElementById('cbt-flee-btn').style.display='none';
+  document.getElementById('cbt-status').textContent='Fled. Pick a fight.';
+}
+function toggleAuto(){
+  G.cbtAuto=!G.cbtAuto;
+  document.getElementById('cbt-auto-lbl').textContent=G.cbtAuto?'On':'Off';
+  document.getElementById('cbt-auto-btn').textContent=G.cbtAuto?'⚡ Auto: ON':'⚡ Toggle Auto';
+  notify('Auto-fight: '+(G.cbtAuto?'ON':'OFF'));
+}
+function updateCombatUI(){
+  document.getElementById('p-hp').style.width=(G.hp/G.hpMax*100)+'%';
+  document.getElementById('e-hp').style.width=(cbtEnemy?cbtEnemy.curHp/cbtEnemy.hp*100:100)+'%';
+  document.getElementById('p-hp-num').textContent=Math.floor(G.hp)+'/'+G.hpMax;
+  document.getElementById('e-hp-num').textContent=cbtEnemy?Math.floor(cbtEnemy.curHp)+'/'+cbtEnemy.hp:'—/—';
+}
+
+// ═══════════════ PROFITS ═══════════════
+function setProfSort(s){
+  G.profSort=s;
+  document.querySelectorAll('[id^="prof-"]').forEach(b=>b.classList.remove('primary'));
+  document.getElementById('prof-'+s).classList.add('primary');
+  renderProfits();
+}
+function renderProfits(){
+  const all=[];
+  SKILLS.filter(s=>s.id!=='thieving').forEach(sk=>{
+    (SKILL_ACTIONS[sk.id]||[]).forEach(a=>{if(sk.lv>=a.reqLv)all.push({name:sk.icon+' '+a.name,xph:xphCalc(sk,a),gph:gphCalc(sk,a),sph:sphCalc(sk,a)});});
+  });
+  CRAFT_SKILLS.forEach(sk=>{
+    (CRAFT_ACTIONS[sk.id]||[]).forEach(a=>{if(sk.lv>=a.reqLv)all.push({name:sk.icon+' '+a.name,xph:xphCalc(sk,a),gph:gphCalc(sk,a),sph:sphCalc(sk,a)});});
+  });
+  all.sort((a,b)=>b[G.profSort]-a[G.profSort]);
+  document.getElementById('prof-list').innerHTML=all.slice(0,20).map((r,i)=>`
+    <div style="display:grid;grid-template-columns:1fr 80px 80px 90px;gap:6px;padding:4px 6px;border-radius:3px;font-size:11px${i%2===0?';background:var(--bg3)':''}">
+      <span><span style="color:var(--text3)">${i+1}.</span> ${r.name}</span>
+      <span style="color:var(--teal3)">${r.xph.toLocaleString()}</span>
+      <span style="color:var(--amber3)">${r.gph.toLocaleString()}</span>
+      <span style="color:var(--text2)">${r.sph.toLocaleString()}</span>
+    </div>`).join('');
+}
+
+// ═══════════════ GAME TICK ═══════════════
+function gameTick(){
+  const now=Date.now(),dt=(now-lastTick)/1000;lastTick=now;
+  let totalSpDrain=0;
+
+  // Skilling tick
+  Object.entries(ACTIVE_SK).forEach(([skId,v])=>{
+    const sk=SKILLS.find(s=>s.id===skId),a=(SKILL_ACTIONS[skId]||[]).find(x=>x.id===v.action);
+    if(!a||!sk)return;
+    // Pause production whose output is parked at 0g (over-produced): no yield, no stamina, no time.
+    if(v.mode!=='train'&&isFloored(a.yield)){v.paused=true;v.prog=0;
+      const pf0=document.getElementById('prog-sk-'+a.id);if(pf0)pf0.style.width='0%';return;}
+    v.paused=false;
+    // Min 1-second actions: if an action would resolve in <1s, batch it so the same throughput is
+    // delivered in one >=1s action (proportionally more items, xp and stamina).
+    const base=effTime(sk,a);
+    const batch=base>=1?1:Math.max(1,Math.ceil(1/base));
+    const dur=base*batch;
+    totalSpDrain+=a.stam*batch;
+    v.timer=(v.timer||0)+dt;v.prog=Math.min(1,v.timer/dur);
+    const pf=document.getElementById('prog-sk-'+a.id),tf=document.getElementById('tp-'+skId);
+    if(pf)pf.style.width=(v.prog*100)+'%';if(tf)tf.style.width=(v.prog*100)+'%';
+    if(v.timer>=dur){
+      v.timer=0;v.prog=0;
+      const xpUnit=Math.floor(a.xp*getStoneBonus('allXP'));
+      if(v.mode==='train'){
+        sk.xp+=a.xp*2*batch;sk.mastery[a.id]=(sk.mastery[a.id]||0)+2*batch;
+        feedAdd([{t:'(training — no yield)',c:'fc-dim'},{t:'+'+(a.xp*2*batch)+' '+sk.name+' XP',c:'fc-xp'}]);
+      } else {
+        let made=0,xpGain=0;
+        for(let i=0;i<batch;i++){
+          sk.mastery[a.id]=(sk.mastery[a.id]||0)+1;
+          if(Math.random()<a.success){made++;xpGain+=xpUnit;}
+          else xpGain+=Math.floor(xpUnit*0.3);
+        }
+        let soldG=0,out=made;
+        if(made>0){out=Math.max(made,Math.round(made*prodMult(skId)));const ov=addItem(a.yield,out);if(ov.sold>0)soldG=ov.earned;}
+        sk.xp+=xpGain;
+        const parts=[];
+        if(out>0)parts.push({t:'+'+out+' '+a.yield,c:'fc-pos'});
+        if(made<batch)parts.push({t:'✗ '+(batch-made)+' failed',c:'fc-dim'});
+        parts.push({t:'+'+xpGain+' '+sk.name+' XP',c:'fc-xp'});
+        parts.push({t:'⚡−'+(a.stam*batch).toFixed(1),c:'fc-neg'});
+        if(soldG>0)parts.push({t:'cap! auto-sold +'+soldG+'g',c:'fc-dim'});
+        feedAdd(parts);
+      }
+      sk.groupMastery=Object.values(sk.mastery).reduce((x,y)=>x+y,0);
+      while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;triggerLvlUp(sk);}
+    }
+  });
+
+  // Crafting tick
+  Object.entries(ACTIVE_CR).forEach(([skId,v])=>{
+    const sk=CRAFT_SKILLS.find(s=>s.id===skId),a=(CRAFT_ACTIONS[skId]||[]).find(x=>x.id===v.action);
+    if(!a||!sk)return;
+    // Effort mode: craft duration includes time to produce missing ingredients via effort.
+    // Buy mode (or train): just the craft's own time.
+    let dur=effTime(sk,a);
+    if(v.mode==='effort'){
+      const invCopy={...INV};
+      let extra=0;
+      (a.ingredients||[]).forEach(ing=>{extra+=effortTime(ing.item,ing.qty,invCopy,0);});
+      dur+=extra;
+      if(!v._effortDur||Math.abs(v._effortDur-dur)>0.01){v._effortDur=dur;}
+      else dur=v._effortDur; // stabilise the bar within a run
+    }
+    totalSpDrain+=a.stam*0.3;
+    v.timer=(v.timer||0)+dt;v.prog=Math.min(1,v.timer/dur);
+    const pf=document.getElementById('prog-cr-'+a.id),tf=document.getElementById('tp-cr-'+skId);
+    if(pf)pf.style.width=(v.prog*100)+'%';if(tf)tf.style.width=(v.prog*100)+'%';
+    if(v.timer>=dur){
+      v.timer=0;v.prog=0;v._effortDur=null;
+      if(v.mode==='train'){
+        sk.xp+=a.xp*2;sk.mastery[a.id]=(sk.mastery[a.id]||0)+2;
+        feedAdd([{t:'(training — no materials)',c:'fc-dim'},{t:'+'+a.xp*2+' '+sk.name+' XP',c:'fc-xp'}]);
+      } else {
+        const ingr=a.ingredients||[];
+        const fp=[];
+        let canDo=true;
+        if(v.mode==='buy'){
+          // Buy ingredients from market; fall back to effort-craft on insufficient gold.
+          ingr.forEach(i=>{
+            const need=Math.max(0,i.qty-(INV[i.item]||0));
+            if(need>0){
+              const c=Math.ceil(mktPrice(i.item)*need);
+              if(G.gold>=c){G.gold-=c;INV[i.item]=(INV[i.item]||0)+need;
+                if(isFloored(i.item))drawFloor(i.item,need); else adjustMktPrice(i.item,need*0.02);
+                fp.push({t:'-'+c+'g ('+need+'x '+i.item+')',c:'fc-neg'});}
+              else{const got=effortMake(i.item,need,fp,0);if(got<need)canDo=false;}
+            }
+          });
+        } else {
+          // Effort mode: produce all missing ingredients through effort (recursive).
+          ingr.forEach(i=>{
+            const got=effortMake(i.item,i.qty,fp,0);
+            if(got<i.qty)canDo=false;
+          });
+        }
+        // final consume check
+        canDo=canDo&&ingr.every(i=>(INV[i.item]||0)>=i.qty);
+        // consume heat (auto-buy & burn fuel if short)
+        const heatNeed=craftHeatCost(a);
+        if(canDo&&!ensureHeat(heatNeed)){canDo=false;fp.push({t:'✗ not enough heat/gold to forge',c:'fc-neg'});}
+        // consume mana (luxury refining) — cannot be auto-bought, must regenerate
+        const manaNeed=craftManaCost(a);
+        if(canDo&&manaNeed>0&&G.mp<manaNeed){canDo=false;fp.push({t:'✗ not enough mana ('+manaNeed+'✦ needed)',c:'fc-neg'});}
+        if(canDo){
+          HEAT-=heatNeed;fp.push({t:'🔥 -'+heatNeed+' heat',c:'fc-neg'});
+          if(manaNeed>0){G.mp=Math.max(0,G.mp-manaNeed);fp.push({t:'✦ -'+manaNeed+' mana',c:'fc-neg'});}
+          ingr.forEach(i=>{INV[i.item]=Math.max(0,(INV[i.item]||0)-i.qty);fp.push({t:'-'+i.qty+'x '+i.item,c:'fc-neg'});});
+          if(Math.random()<a.success){
+            const outQ=Math.max(a.qty||1,Math.round((a.qty||1)*prodMult(skId)));
+            const ov=addItem(a.yield,outQ);sk.xp+=a.xp;sk.mastery[a.id]=(sk.mastery[a.id]||0)+1;
+            const crParts=[{t:'+'+outQ+' '+a.yield,c:'fc-pos'},{t:'+'+a.xp+' '+sk.name+' XP',c:'fc-xp'},...fp];
+            if(ov.sold>0)crParts.push({t:'cap! auto-sold +'+ov.earned+'g',c:'fc-dim'});
+            feedAdd(crParts);
+          } else {
+            const xpF=Math.floor(a.xp*0.3);sk.xp+=xpF;sk.mastery[a.id]=(sk.mastery[a.id]||0)+1;
+            feedAdd([{t:'✗ '+a.name+' failed',c:'fc-dim'},{t:'+'+xpF+' XP',c:'fc-xp'},...fp]);
+          }
+          if(v.remaining>0&&v.remaining!==999){v.remaining--;if(v.remaining===0){delete ACTIVE_CR[skId];updateGold();return;}}
+          updateGold();
+        } else {
+          feedAdd([{t:'✗ Cannot make '+a.name+' (out of materials & gold)',c:'fc-dim'},...fp]);
+          delete ACTIVE_CR[skId];updateGold();return;
+        }
+      }
+      sk.groupMastery=Object.values(sk.mastery).reduce((a,b)=>a+b,0);
+      while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;triggerLvlUp(sk);}
+    }
+  });
+
+  // Land tick (buildings auto-produce forever)
+  const landVisible=(document.querySelector('.panel.active')?.id==='tab-market')&&MKT_SUB==='land';
+  LAND.forEach((plot,pi)=>{plot.buildings.forEach((b,bi)=>{
+    const def=BLDEFS[b.type];if(!def)return;
+    // Pause a building whose output is parked at 0g (over-produced).
+    if(isFloored(b.output)){b.prog=0;if(landVisible){const bar0=document.getElementById('mkt-bld-'+pi+'-'+bi);if(bar0)bar0.style.width='0%';}return;}
+    const rawSpeed=def.speed/b.lv;
+    // Min 1-second cycles: batch sub-second production so each cycle is >=1s with proportional output.
+    const batch=rawSpeed>=1?1:Math.max(1,Math.ceil(1/rawSpeed));
+    const speed=rawSpeed*batch;
+    b.timer=(b.timer||0)+dt;b.prog=Math.min(1,b.timer/speed);
+    if(landVisible){const bar=document.getElementById('mkt-bld-'+pi+'-'+bi);if(bar)bar.style.width=(b.prog*100)+'%';}
+    if(b.timer>=speed){b.timer=0;b.prog=0;
+      if(b.inputMode==='market'){const cost=Math.ceil(mktPrice(b.output)*batch);if(G.gold>=cost){G.gold-=cost;if(isFloored(b.output))drawFloor(b.output,batch);else adjustMktPrice(b.output,0.02*batch);}else return;}
+      addItem(b.output,batch);}
+  });});
+
+  // Thieving tick
+  if(THV_LYING_LOW){
+    THV_LL_TIMER=Math.max(0,THV_LL_TIMER-dt);
+    if(THV_LL_TIMER<=0){THV_LYING_LOW=false;ACTIVE_THV_TIMER=0;
+      notify(ACTIVE_THV?'Back in action — resuming!':'Back in action!');
+      const ap=document.querySelector('.panel.active');
+      if(ap&&ap.id==='tab-thieving')renderThieving();
+    }
+  } else if(ACTIVE_THV&&G.myThief){
+    const allActs=Object.values(THV_ACTIONS).flatMap(z=>[...(z.picks||[]),...(z.heists||[])]);
+    const a=allActs.find(x=>x.id===ACTIVE_THV),sk=SKILLS.find(s=>s.id==='thieving');
+    if(a&&sk){
+      totalSpDrain+=1.5;ACTIVE_THV_TIMER+=dt;
+      const thvProg=document.getElementById('thv-prog-'+a.id);
+      if(thvProg)thvProg.style.width=(ACTIVE_THV_TIMER/a.time*100)+'%';
+      if(ACTIVE_THV_TIMER>=a.time){
+        ACTIVE_THV_TIMER=0;
+        const tc=THIEF_NPC_COUNT+1,pc=POLICE.filter(p=>p.role==='police'||p.role==='vigilant').length;
+        const finalSuccess=a.success-(pc>0?pc/(tc+pc)*0.3:0);
+        const myBonus=Math.max(0,60-tc*8)/100;
+        if(Math.random()<finalSuccess){
+          const reward=a.reward[0]+Math.floor(Math.random()*(a.reward[1]-a.reward[0]));
+          const earned=Math.floor(reward*(1+myBonus));gainGold(earned);sk.xp+=a.xp;
+          feedAdd([{t:'+'+earned+'g ('+a.name+')',c:'fc-pos'},{t:'+'+a.xp+' Thieving XP',c:'fc-xp'}]);
+          notify('Lifted '+earned+'g from '+a.name+'!');updateGold();
+        } else {
+          const llTime=a.time*(Math.random()<0.3?3:1.5);
+          THV_LYING_LOW=true;THV_LL_TIMER=llTime;
+          feedAdd([{t:'✗ Caught! Lying low '+llTime.toFixed(0)+'s',c:'fc-neg'}]);
+          notify('Caught! Lying low for '+llTime.toFixed(0)+'s — will resume',3500);
+          const ap2=document.querySelector('.panel.active');
+          if(ap2&&ap2.id==='tab-thieving')renderThieving();
+        }
+        while(sk.xp>=lvToXp(sk.lv)){sk.xp-=lvToXp(sk.lv);sk.lv++;triggerLvlUp(sk);}
+      }
+    }
+  }
+
+  // Pools
+  if(!G.cbtFighting)G.hp=Math.min(G.hpMax,G.hp+G.hpRegen*dt);
+  const spNet=totalSpDrain>0?-totalSpDrain:G.spRegen;
+  G.sp=Math.max(0,Math.min(G.spMax,G.sp+spNet*dt));
+  G.mp=Math.min(G.mpMax,G.mp+G.mpRegen*dt);
+  document.getElementById('sp-rate').textContent=(spNet>=0?'+':'')+spNet.toFixed(1)+'/s';
+  document.getElementById('sp-rate').className='pool-rate '+(spNet<0?'neg':'pos');
+  document.getElementById('hp-rate').textContent=G.cbtFighting?'—':'+'+G.hpRegen.toFixed(1)+'/s';
+  document.getElementById('hp-rate').className='pool-rate '+(G.cbtFighting?'neutral':'pos');
+  document.getElementById('mp-rate').textContent=G.mp>=G.mpMax?'Full':'+'+G.mpRegen.toFixed(1)+'/s';
+  document.getElementById('mp-rate').className='pool-rate '+(G.mp>=G.mpMax?'neutral':'pos');
+
+  // Population consumption cycle (every 5 min)
+  ECONOMY.consumeTimer+=dt;
+  if(ECONOMY.consumeTimer>=ECONOMY.consumeInterval){
+    ECONOMY.consumeTimer=0;
+    runConsumption();
+    const totalSpent=ECONOMY.lastConsume.reduce((s,l)=>s+l.spent,0);
+    const totalQty=ECONOMY.lastConsume.reduce((s,l)=>s+l.qty,0);
+    notify('📦 Population consumed '+totalQty+' items ('+totalSpent.toLocaleString()+'g demand)',3500);
+  }
+
+  // Research world (NPC researchers raise global levels, pay study royalties, study baubles)
+  RES_WORLD.timer+=dt;
+  if(RES_WORLD.timer>=RES_WORLD.interval){RES_WORLD.timer=0;researchWorldTick();}
+
+  // Market recovery
+  Object.keys(MKT).forEach(k=>{
+    if(MKT[k].floored)return; // parked at 0g until its buffer is consumed
+    if(MKT[k].price<MKT[k].base)MKT[k].price=Math.min(MKT[k].base,MKT[k].price+MKT[k].base*0.00005);
+    if(MKT[k].price>MKT[k].base*3)MKT[k].price*=0.9999;
+  });
+
+  updatePools();
+  bannerUpdate();
+}
+
+
+
+
+// ═══════════════ PROFILE ═══════════════
+const STAT_ICONS={Strength:'💪',Agility:'🏃',Intelligence:'🧠',Perception:'👁',Endurance:'🛡',Dexterity:'✋',Intellect:'📖'};
+function renderProfile(){
+  const el=(id)=>document.getElementById(id);
+  el('prof-gold').textContent=Math.floor(G.gold).toLocaleString()+'g';
+  el('prof-sales').textContent=G.salesDay.toLocaleString()+'g';
+  el('prof-cap').textContent=itemCap()+'/item (Lv '+G.capLv+')';
+  el('prof-role').textContent=G.myThief?'🗡 Thief':G.myPolice?('🛡 '+G.myPolice):'Citizen';
+  const gov=(id,v)=>{const e=el(id);if(e)e.textContent=v;};
+  gov('gov-treasury',Math.floor(GOV.treasury).toLocaleString()+'g');
+  gov('gov-rate',Math.floor(GOV.taxRate*100)+'%');
+  gov('gov-rate2',Math.floor(GOV.taxRate*100)+'%');
+  gov('gov-mytax',Math.floor(GOV.collectedToday).toLocaleString()+'g');
+  gov('gov-npctax',Math.floor(GOV.npcContribToday).toLocaleString()+'g');
+  el('prof-hp').textContent=Math.floor(G.hp)+'/'+G.hpMax+' (+'+G.hpRegen.toFixed(1)+'/s)';
+  el('prof-sp').textContent=Math.floor(G.sp)+'/'+G.spMax;
+  el('prof-mp').textContent=Math.floor(G.mp)+'/'+G.mpMax;
+  // stats: aggregate skill levels per stat
+  const stats={};
+  [...SKILLS,...CRAFT_SKILLS].forEach(sk=>{
+    if(!stats[sk.stat])stats[sk.stat]={lv:0,skills:[],bonus:0};
+    stats[sk.stat].lv+=sk.lv;
+    stats[sk.stat].bonus+=sk.statBonus*(sk.lv/10);
+    stats[sk.stat].skills.push(sk.icon+' '+sk.name+' '+sk.lv);
+  });
+  el('prof-stats').innerHTML=Object.entries(stats).map(([name,s])=>`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:9px 11px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-weight:700;font-size:12px">${STAT_ICONS[name]||'◆'} ${name}</span>
+        <span class="badge lv">Lv ${s.lv}</span>
+      </div>
+      <div style="font-size:10px;color:var(--teal3);margin-bottom:4px">+${(s.bonus*100).toFixed(1)}% speed on ${name} actions</div>
+      <div style="font-size:9px;color:var(--text3)">${s.skills.join(' · ')}</div>
+    </div>`).join('');
+  // all skills
+  el('prof-skills').innerHTML=[...SKILLS,...CRAFT_SKILLS].map(sk=>{
+    const xpN=lvToXp(sk.lv),pct=Math.min(100,sk.xp/xpN*100);
+    return `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:8px 10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600">${sk.icon} ${sk.name}</span>
+        <span class="badge lv">Lv ${sk.lv}</span>
+      </div>
+      <div class="xpbar" style="height:5px"><div class="xpfill" style="width:${pct}%"></div></div>
+      <div style="font-size:9px;color:var(--text3);margin-top:3px">${Math.floor(sk.xp)}/${xpN} XP · trains ${sk.stat}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════ LIVE UI REFRESH ═══════════════
+let _lastInvSig='';
+function refreshInventoryLive(){
+  const sig=Object.entries(INV).filter(([,v])=>v>0).map(([k,v])=>k+':'+v).join('|');
+  if(sig!==_lastInvSig){_lastInvSig=sig;renderInventory();}
+  else{
+    const hi=document.getElementById('hold-info');
+    if(hi)hi.textContent=itemCap()+' per item';
+  }
+}
+function refreshMarketLive(){
+  const el=(id)=>document.getElementById(id);
+  if(el('mkt-thief-pen'))el('mkt-thief-pen').textContent='−'+Math.floor(getThiefPenalty()*100)+'%';
+  if(el('mkt-sales'))el('mkt-sales').textContent=G.salesDay.toLocaleString()+'g';
+  if(el('mkt-heat'))el('mkt-heat').textContent=Math.floor(HEAT).toLocaleString();
+  if(el('mkt-pop'))el('mkt-pop').textContent=totalPopulation().toLocaleString();
+  if(el('mkt-consume-t'))el('mkt-consume-t').textContent=Math.ceil(ECONOMY.consumeInterval-ECONOMY.consumeTimer)+'s';
+  if(MKT_SUB!=='prices'){
+    // non-price tabs: cheap full re-render keeps rankings & quantities fresh
+    const c=document.getElementById('msub-content');
+    if(c){if(MKT_SUB==='heat')renderMktHeat(c);else if(MKT_SUB==='economy')renderMktEconomy(c);else if(MKT_SUB==='consumption')renderMktConsumption(c);else if(MKT_SUB==='inventory')renderMktInventory(c);}
+    return;
+  }
+  Object.entries(MKT).forEach(([name,m])=>{
+    const safeId=name.replace(/[^a-zA-Z0-9]/g,'_');
+    const pq=el('mq-'+safeId),pp=el('mp-'+safeId);
+    if(pq)pq.textContent=INV[name]||0;
+    if(pp){
+      const pct=(m.price-m.base)/m.base*100;
+      pp.textContent=(m.price<10?m.price.toFixed(1):Math.floor(m.price))+'g '+(pct>0?'▲':'▼');
+      pp.className=pct>0?'price-up':'price-dn';
+    }
+  });
+}
+function refreshThievingLive(){
+  const sk=SKILLS.find(s=>s.id==='thieving');if(!sk)return;
+  const el=(id)=>document.getElementById(id);
+  const xpN=lvToXp(sk.lv);
+  if(el('thv-lv-badge'))el('thv-lv-badge').textContent='Lv '+sk.lv;
+  if(el('thv-xpbar'))el('thv-xpbar').style.width=Math.min(100,sk.xp/xpN*100)+'%';
+  if(el('thv-xplbl'))el('thv-xplbl').textContent=Math.floor(sk.xp)+'/'+xpN;
+  if(el('thv-my-status'))el('thv-my-status').textContent=G.myThief?(THV_LYING_LOW?'⏳ Lying low... ('+Math.ceil(THV_LL_TIMER)+'s)':'Active thief.'):'Not in the guild.';
+}
+function refreshSkillingLive(){
+  const sk=SKILLS.find(s=>s.id===currentSkill);if(!sk)return;
+  const xpNext=lvToXp(sk.lv),pct=Math.min(100,sk.xp/xpNext*100);
+  const el=(id)=>document.getElementById(id);
+  if(el('sk-xpbar'))el('sk-xpbar').style.width=pct+'%';
+  if(el('sk-xplbl'))el('sk-xplbl').textContent=Math.floor(sk.xp)+'/'+xpNext;
+  if(el('sk-lv'))el('sk-lv').textContent='Lv '+sk.lv;
+  if(el('sk-prog-bar2'))el('sk-prog-bar2').style.width=pct+'%';
+  if(el('sk-xplbl2'))el('sk-xplbl2').textContent='Lv '+sk.lv+' → '+(sk.lv+1);
+  if(el('sk-gmastery'))el('sk-gmastery').textContent='+'+sk.groupMastery+'%';
+  (SKILL_ACTIONS[currentSkill]||[]).forEach(a=>{
+    const m=el('mast-sk-'+a.id);
+    if(m)m.textContent=sk.mastery[a.id]||0;
+  });
+}
+function refreshCraftingLive(){
+  const sk=CRAFT_SKILLS.find(s=>s.id===currentCraft);if(!sk)return;
+  const xpN=lvToXp(sk.lv);
+  const el=(id)=>document.getElementById(id);
+  if(el('craft-xpbar'))el('craft-xpbar').style.width=Math.min(100,sk.xp/xpN*100)+'%';
+  if(el('craft-xplbl'))el('craft-xplbl').textContent=Math.floor(sk.xp)+'/'+xpN;
+  if(el('craft-lv-lbl'))el('craft-lv-lbl').textContent='Lv '+sk.lv;
+  (CRAFT_ACTIONS[currentCraft]||[]).forEach(a=>{const m=el('mast-cr-'+a.id);if(m)m.textContent=sk.mastery[a.id]||0;});
+}
+
+// ═══════════════ BANNER & LEVEL-UP ═══════════════
+const lvlQ=[];let lvlOpen=false;
+let bnSkId=null,bnType=null;
+
+function bannerUpdate(){
+  const all=[...Object.entries(ACTIVE_SK).map(([k,v])=>({k,v,type:'sk'})),
+             ...Object.entries(ACTIVE_CR).map(([k,v])=>({k,v,type:'cr'}))];
+  const thvActive=ACTIVE_THV&&G.myThief;
+  const banner=document.getElementById('act-banner');
+  if(!all.length&&!thvActive){banner.classList.remove('open');return;}
+  banner.classList.add('open');
+  if(all.length){
+    const {k,v,type}=all[0];
+    const allSk=[...SKILLS,...CRAFT_SKILLS];
+    const allAct=[...Object.values(SKILL_ACTIONS),...Object.values(CRAFT_ACTIONS)].flat();
+    const sk=allSk.find(s=>s.id===k),a=allAct.find(x=>x.id===v.action);
+    if(sk&&a){
+      bnSkId=k;bnType=type;
+      const drain=(a.stam*(type==='cr'?0.3:1)).toFixed(1);
+      document.getElementById('bn-icon').textContent=sk.icon;
+      document.getElementById('bn-name').textContent=a.name+(v.mode==='train'?' (training)':'');
+      const bs=document.getElementById('bn-state');
+      if(v.paused){
+        bs.textContent='⏸ paused — '+a.yield+' at 0g';
+        bs.style.color='var(--text3)';
+        document.getElementById('bn-drain').textContent='';
+        document.getElementById('bn-prog').style.background='';
+        document.getElementById('bn-prog').style.width='0%';
+      } else {
+        bs.textContent='● '+(type==='cr'?'crafting':'skilling')+'...';
+        bs.style.color='var(--amber3)';
+        document.getElementById('bn-prog').style.background='';
+        document.getElementById('bn-drain').textContent='⚡ −'+drain+'/s';
+        document.getElementById('bn-prog').style.width=((v.prog||0)*100).toFixed(1)+'%';
+      }
+    }
+  } else if(thvActive){
+    const allThv=Object.values(THV_ACTIONS).flatMap(z=>[...(z.picks||[]),...(z.heists||[])]);
+    const ta=allThv.find(x=>x.id===ACTIVE_THV);
+    if(ta){
+      bnSkId=null;bnType='thv';
+      document.getElementById('bn-icon').textContent='🗡';
+      document.getElementById('bn-name').textContent=ta.name;
+      const bnProg=document.getElementById('bn-prog');
+      const bnState=document.getElementById('bn-state');
+      if(THV_LYING_LOW){
+        bnState.textContent='⚠ Caught! Lying low '+Math.ceil(THV_LL_TIMER)+'s';
+        bnState.style.color='#e07070';
+        document.getElementById('bn-drain').textContent='';
+        bnProg.style.width='100%';
+        bnProg.style.background='linear-gradient(90deg,#5a1515 0%,#9b2020 65%,#c05050 100%)';
+      } else {
+        bnState.textContent='● thieving...';
+        bnState.style.color='var(--amber3)';
+        document.getElementById('bn-drain').textContent='⚡ −1.5/s';
+        bnProg.style.width=(ACTIVE_THV_TIMER/ta.time*100).toFixed(1)+'%';
+        bnProg.style.background='';
+      }
+    }
+  }
+}
+
+function bannerStop(){
+  if(bnType==='sk'&&bnSkId)delete ACTIVE_SK[bnSkId];
+  if(bnType==='cr'&&bnSkId)delete ACTIVE_CR[bnSkId];
+  if(bnType==='thv'){ACTIVE_THV=null;ACTIVE_THV_TIMER=0;}
+  bannerUpdate();
+  const p=document.querySelector('.panel.active');if(p){
+    const id=p.id.replace('tab-','');
+    if(id==='skilling')renderSkilling();
+    if(id==='crafting')renderCrafting();
+    if(id==='thieving')refreshThievingLive();
+  }
+}
+
+function feedAdd(parts){
+  const feed=document.getElementById('bn-feed');if(!feed)return;
+  const line=document.createElement('div');line.className='feed-line';
+  parts.forEach(p=>{const s=document.createElement('span');s.textContent=p.t;s.className=p.c||'';line.appendChild(s);});
+  feed.insertBefore(line,feed.firstChild);
+  while(feed.children.length>7)feed.removeChild(feed.lastChild);
+}
+
+function triggerLvlUp(sk){
+  // No queue: a new level-up immediately replaces whatever popup is showing.
+  const msgs=['Your '+sk.name+' mastery deepens.','The realm recognises your skill.','New possibilities unlock before you.','Your '+sk.stat+' grows stronger.','Fortune favours the persistent.'];
+  document.getElementById('lu-icon').textContent=sk.icon;
+  document.getElementById('lu-skill').textContent=sk.name;
+  document.getElementById('lu-title').textContent=sk.name+' Level '+sk.lv+'!';
+  document.getElementById('lu-sub').textContent=msgs[sk.lv%msgs.length];
+  document.getElementById('lvlup-ov').classList.add('show');
+}
+function lvlNext(){} // retained for compatibility (queue removed)
+function lvlClose(){
+  document.getElementById('lvlup-ov').classList.remove('show');
+}
+
+// ═══════════════ INIT ═══════════════
+buildProducerIndex();
+renderSkilling();
+renderCombat();
+setInterval(gameTick,100);
+setInterval(()=>{
+  const active=document.querySelector('.panel.active');if(!active)return;
+  const id=active.id.replace('tab-','');
+  if(id==='skilling'){renderActiveTasks();refreshSkillingLive();document.querySelectorAll('#sk-tabs .stab').forEach((b,i)=>{const s=SKILLS.filter(x=>x.id!=='thieving')[i];if(s)b.textContent=s.icon+' '+s.name+' '+s.lv;});}
+  if(id==='crafting'){refreshCraftingLive();document.querySelectorAll('#craft-tabs .stab').forEach((b,i)=>{const s=CRAFT_SKILLS[i];if(s)b.textContent=s.icon+' '+s.name+' '+s.lv;});}
+  if(id==='thieving'){if(THV_SUB==='police')renderPolice();else refreshThievingLive();}
+  if(id==='market')refreshMarketLive();
+  if(id==='profile')renderProfile();
+},1500);
+</script>
+</body>
+</html>
