@@ -2293,8 +2293,8 @@ function gameTick(){
   Object.entries(ACTIVE_SK).forEach(([skId,v])=>{
     const sk=SKILLS.find(s=>s.id===skId),a=(SKILL_ACTIONS[skId]||[]).find(x=>x.id===v.action);
     if(!a||!sk)return;
-    // Pause production whose output is parked at 0g (over-produced): no yield, no stamina, no time.
-    if(v.mode!=='train'&&isFloored(a.yield)){v.paused=true;v.prog=0;
+    // Pause production only once the output item reaches inventory cap: no yield, no stamina, no time.
+    if(v.mode!=='train'&&(INV[a.yield]||0)>=itemCap()){v.paused=true;v.prog=0;
       const pf0=document.getElementById('prog-sk-'+a.id);if(pf0)pf0.style.width='0%';return;}
     v.paused=false;
     // Min 1-second actions: if an action would resolve in <1s, batch it so the same throughput is
@@ -2420,8 +2420,8 @@ function gameTick(){
   const landVisible=(document.querySelector('.panel.active')?.id==='tab-market')&&MKT_SUB==='land';
   LAND.forEach((plot,pi)=>{plot.buildings.forEach((b,bi)=>{
     const def=BLDEFS[b.type];if(!def)return;
-    // Pause a building whose output is parked at 0g (over-produced).
-    if(isFloored(b.output)){b.prog=0;if(landVisible){const bar0=document.getElementById('mkt-bld-'+pi+'-'+bi);if(bar0)bar0.style.width='0%';}return;}
+    // Pause a building only once its output item reaches inventory cap.
+    if((INV[b.output]||0)>=itemCap()){b.prog=0;if(landVisible){const bar0=document.getElementById('mkt-bld-'+pi+'-'+bi);if(bar0)bar0.style.width='0%';}return;}
     const rawSpeed=def.speed/b.lv;
     // Min 1-second cycles: batch sub-second production so each cycle is >=1s with proportional output.
     const batch=rawSpeed>=1?1:Math.max(1,Math.ceil(1/rawSpeed));
@@ -2650,7 +2650,7 @@ function bannerUpdate(){
       document.getElementById('bn-name').textContent=a.name+(v.mode==='train'?' (training)':'');
       const bs=document.getElementById('bn-state');
       if(v.paused){
-        bs.textContent='⏸ paused — '+a.yield+' at 0g';
+        bs.textContent='⏸ paused — '+a.yield+' inventory full ('+itemCap()+')';
         bs.style.color='var(--text3)';
         document.getElementById('bn-drain').textContent='';
         document.getElementById('bn-prog').style.background='';
