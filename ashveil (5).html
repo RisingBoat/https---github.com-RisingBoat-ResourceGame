@@ -2810,6 +2810,53 @@ setInterval(gameTick,100);
 setInterval(()=>saveGame(false),5000);
 window.addEventListener('beforeunload',()=>saveGame(false));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame(false);});
+
+// ═══════════════ LIVE GRANTS (from Claude, via the artifact database) ═══════════════
+// Claude writes documents into the 'grants' collection; the open page applies each one once,
+// live, with no reload. Applied ids are remembered in this browser (kept even by Reset progress).
+// Shapes: {type:'skillLevels',skill,amount} · {type:'gold',amount} · {type:'item',item,amount}
+//         {type:'mastery',skill,action,amount} · optional note (shown to the player).
+const GRANTS_KEY='ashveil-grants-applied';
+let GRANTS_APPLIED=new Set();
+try{GRANTS_APPLIED=new Set(JSON.parse(localStorage.getItem(GRANTS_KEY)||'[]'));}catch(e){}
+function rerenderActive(){
+  const p=document.querySelector('.panel.active');if(!p)return;
+  ({profile:renderProfile,skilling:renderSkilling,crafting:renderCrafting,market:renderMarket,
+    thieving:renderThieving,research:renderResearch,housing:renderHousing,combat:renderCombat})[p.id.replace('tab-','')]?.();
+}
+function applyGrant(id,g){
+  if(!g||GRANTS_APPLIED.has(id))return;
+  const amt=Math.floor(Number(g.amount));
+  const ok=Number.isFinite(amt)&&amt>0;
+  const allSk=[...SKILLS,...CRAFT_SKILLS];
+  let msg=null;
+  if(ok&&g.type==='skillLevels'&&amt<=1000){
+    const sk=allSk.find(s=>s.id===g.skill);
+    if(sk){sk.lv+=amt;triggerLvlUp(sk);msg='+'+amt+' '+sk.name+' levels (now Lv '+sk.lv+')';}
+  } else if(ok&&g.type==='gold'&&amt<=1e9){
+    G.gold+=amt;msg='+'+amt.toLocaleString()+' gold';
+  } else if(ok&&g.type==='item'&&amt<=1e6&&MKT[g.item]){
+    INV[g.item]=(INV[g.item]||0)+amt;msg='+'+amt.toLocaleString()+'× '+g.item;
+  } else if(ok&&g.type==='mastery'&&amt<=1e6){
+    const sk=allSk.find(s=>s.id===g.skill);
+    const a=sk&&[...(SKILL_ACTIONS[sk.id]||[]),...(CRAFT_ACTIONS[sk.id]||[])].find(x=>x.id===g.action);
+    if(a){sk.mastery[a.id]=(sk.mastery[a.id]||0)+amt;sk.groupMastery=Object.values(sk.mastery).reduce((x,y)=>x+y,0);
+      msg='+'+amt+' '+a.name+' mastery';}
+  }
+  GRANTS_APPLIED.add(id); // remembered even if invalid, so a bad grant is never retried
+  try{localStorage.setItem(GRANTS_KEY,JSON.stringify([...GRANTS_APPLIED]));}catch(e){}
+  if(!msg)return;
+  const note=typeof g.note==='string'?g.note.slice(0,100):'';
+  notify('🎁 '+msg+(note?' — '+note:''),5000);
+  feedAdd([{t:'🎁 '+msg,c:'fc-pos'}]);
+  updateGold();rerenderActive();saveGame(false);
+}
+(async()=>{
+  if(!window.claude||typeof window.claude.use!=='function')return; // e.g. opened as a local file
+  let db=null;try{db=await window.claude.use('db');}catch(e){}
+  if(!db)return;
+  try{db.collection('grants').onSnapshot(snap=>{snap.docs.forEach(d=>{if(d.exists)applyGrant(d.id,d.data());});},()=>{});}catch(e){}
+})();
 setInterval(()=>{
   const active=document.querySelector('.panel.active');if(!active)return;
   const id=active.id.replace('tab-','');
