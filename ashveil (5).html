@@ -237,6 +237,15 @@ select.inp option{background:var(--bg2)}
       <div class="srow"><span class="sk">Role</span><span class="sv" id="prof-role">Citizen</span></div>
     </div>
     <div class="card">
+      <div class="card-title">💾 Save</div>
+      <div class="srow"><span class="sk">Status</span><span class="sv" id="save-status">Not saved yet</span></div>
+      <div style="font-size:10px;color:var(--text3);line-height:1.6;margin:6px 0">Progress saves to this browser every 5 seconds and when you leave the page. It stays on this device only.</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn sm primary" onclick="saveGame(true)">Save now</button>
+        <button class="btn sm danger" id="save-reset-btn" onclick="resetSave(this)">Reset progress</button>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-title">Pools</div>
       <div class="srow"><span class="sk">❤ Health</span><span class="sv" id="prof-hp">—</span></div>
       <div class="srow"><span class="sk">⚡ Stamina</span><span class="sv" id="prof-sp">—</span></div>
@@ -2724,12 +2733,83 @@ function lvlClose(){
   document.getElementById('lvlup-ov').classList.remove('show');
 }
 
+// ═══════════════ SAVE / LOAD (browser localStorage) ═══════════════
+const SAVE_KEY='ashveil-save-v1';
+let SAVE_DISABLED=false;
+function saveGame(manual){
+  if(SAVE_DISABLED)return;
+  try{
+    const skl=arr=>arr.map(s=>({id:s.id,lv:s.lv,xp:s.xp,toolLv:s.toolLv,mastery:s.mastery,groupMastery:s.groupMastery}));
+    const g={...G};delete g._resIv;g.resActive=null;g.resProg=0;g.cbtFighting=false;g.cbtAuto=false;
+    const data={v:1,t:Date.now(),G:g,SKILLS:skl(SKILLS),CRAFT:skl(CRAFT_SKILLS),INV,MKT,HEAT,GOV,
+      ECON:{consumeTimer:ECONOMY.consumeTimer,lastConsume:ECONOMY.lastConsume},
+      LAND,HOUSE,FURN_INV,MY_RES,FAIL_POOL,RES_STATE,RES_GLOBAL,ACTIVE_SK,ACTIVE_CR,
+      THV:{active:ACTIVE_THV,timer:ACTIVE_THV_TIMER,zone:THV_ZONE,low:THV_LYING_LOW,llt:THV_LL_TIMER},
+      ui:{currentSkill,currentCraft,currentCbtZone}};
+    localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+    const st=document.getElementById('save-status');
+    if(st)st.textContent='Saved '+new Date(data.t).toLocaleTimeString();
+    if(manual)notify('Game saved');
+  }catch(e){
+    const st=document.getElementById('save-status');if(st)st.textContent='Saving unavailable in this browser';
+    if(manual)notify('Could not save — browser storage is blocked');
+  }
+}
+function loadGame(){
+  let d;
+  try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){return false;}
+  if(!d||d.v!==1)return false;
+  try{
+    Object.assign(G,d.G||{});G.resActive=null;G.resProg=0;G.cbtFighting=false;G.cbtAuto=false;
+    const restoreSkills=(arr,src)=>(src||[]).forEach(s=>{const k=arr.find(x=>x.id===s.id);
+      if(k)Object.assign(k,{lv:s.lv,xp:s.xp,toolLv:s.toolLv,mastery:s.mastery||{},groupMastery:s.groupMastery||0});});
+    restoreSkills(SKILLS,d.SKILLS);restoreSkills(CRAFT_SKILLS,d.CRAFT);
+    const fill=(t,s)=>{if(s)Object.assign(t,s);};
+    fill(INV,d.INV);
+    Object.entries(d.MKT||{}).forEach(([k,m])=>{if(MKT[k])Object.assign(MKT[k],m);});
+    HEAT=d.HEAT||0;
+    fill(GOV,d.GOV);
+    if(d.ECON){ECONOMY.consumeTimer=d.ECON.consumeTimer||0;ECONOMY.lastConsume=d.ECON.lastConsume||[];}
+    LAND.length=0;(d.LAND||[]).forEach(p=>LAND.push(p));
+    fill(HOUSE,d.HOUSE);fill(FURN_INV,d.FURN_INV);fill(MY_RES,d.MY_RES);fill(FAIL_POOL,d.FAIL_POOL);
+    Object.entries(d.RES_STATE||{}).forEach(([k,v])=>{if(RES_STATE[k])Object.assign(RES_STATE[k],v);});
+    fill(RES_GLOBAL,d.RES_GLOBAL);
+    Object.entries(d.ACTIVE_SK||{}).forEach(([k,v])=>{if(SKILLS.some(s=>s.id===k))ACTIVE_SK[k]=v;});
+    Object.entries(d.ACTIVE_CR||{}).forEach(([k,v])=>{if(CRAFT_SKILLS.some(s=>s.id===k))ACTIVE_CR[k]=v;});
+    if(d.THV){ACTIVE_THV=d.THV.active||null;ACTIVE_THV_TIMER=d.THV.timer||0;THV_ZONE=d.THV.zone||'embergate';
+      THV_LYING_LOW=!!d.THV.low;THV_LL_TIMER=d.THV.llt||0;}
+    if(d.ui){
+      if(SKILLS.some(s=>s.id===d.ui.currentSkill))currentSkill=d.ui.currentSkill;
+      if(CRAFT_SKILLS.some(s=>s.id===d.ui.currentCraft))currentCraft=d.ui.currentCraft;
+      if(CBT_ZONES.some(z=>z.id===d.ui.currentCbtZone))currentCbtZone=d.ui.currentCbtZone;
+    }
+    return true;
+  }catch(e){return false;}
+}
+function resetSave(btn){
+  if(!btn.dataset.armed){
+    btn.dataset.armed='1';btn.textContent='Click again to wipe everything';
+    setTimeout(()=>{delete btn.dataset.armed;btn.textContent='Reset progress';},4000);
+    return;
+  }
+  SAVE_DISABLED=true;
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+  location.reload();
+}
+
 // ═══════════════ INIT ═══════════════
+const _loaded=loadGame();
 buildProducerIndex();
 recomputeHousing();
 renderSkilling();
 renderCombat();
+updateGold();
+updatePools();
+if(_loaded){notify('Welcome back — progress loaded',3000);const st=document.getElementById('save-status');if(st)st.textContent='Loaded '+new Date().toLocaleTimeString();}
 setInterval(gameTick,100);
+setInterval(()=>saveGame(false),5000);
+window.addEventListener('beforeunload',()=>saveGame(false));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame(false);});
 setInterval(()=>{
   const active=document.querySelector('.panel.active');if(!active)return;
   const id=active.id.replace('tab-','');
